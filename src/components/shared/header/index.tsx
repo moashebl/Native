@@ -1,5 +1,3 @@
-import { APP_NAME } from '@/lib/constants'
-import Image from 'next/image'
 import Link from 'next/link'
 import Menu from './menu'
 import { Button } from '@/components/ui/button'
@@ -17,13 +15,7 @@ export default function Header() {
               href='/'
               className='flex items-center header-button font-extrabold text-2xl m-1 '
             >
-              <Image
-                src='/icons/logo.svg'
-                width={100}
-                height={100}
-                alt={`${APP_NAME} logo`}
-              />
-              
+              <span className="text-3xl font-extrabold">Native</span>
             </Link>
           </div>
           <div className='hidden md:block flex-1 max-w-xl'>

@@ -759,7 +759,7 @@ const data: Data ={
       isPublished: true,
     },
     {
-      title: 'Best Sellers in T-Shirts',
+      title: 'Be Normal\nBe Native',
       buttonCaption: 'Shop Now',
       image: '/images/banner1.jpg',
       url: '/search?category=T-Shirts',

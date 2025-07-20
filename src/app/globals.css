@@ -115,6 +115,22 @@
   --sidebar-ring: oklch(0.554 0.135 66.442);
 }
 
+.responsive-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.banner-bg {
+  background-image: url('/images/banner1.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%;
+  height: 300px; /* or any responsive height */
+}
+
 
 @layer base {
   * {
