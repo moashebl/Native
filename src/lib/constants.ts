@@ -4,3 +4,6 @@ export const APP_DESCRIPTION = process.env.NEXT_PUBLIC_APP_DESCRIPTION || 'The b
 export const APP_KEYWORDS = process.env.NEXT_PUBLIC_APP_KEYWORDS || 'T-shirts, hoodies, Egypt, online shopping';
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://native-house.com';
 export const PAGE_SIZE = Number(process.env.PAGE_SIZE || 9)
+export const FREE_SHIPPING_MIN_PRICE = Number(
+    process.env.FREE_SHIPPING_MIN_PRICE || 35
+  )
