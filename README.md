@@ -1,5 +1,28 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Environment Setup
+
+Before running the application, you need to set up your environment variables. Create a `.env.local` file in the root directory with the following variables:
+
+```bash
+# MongoDB Connection String
+MONGODB_URI=mongodb://localhost:27017/aldora-house
+
+# NextAuth Configuration
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-secret-key-here
+```
+
+**Note:** Make sure you have MongoDB running locally or use a cloud MongoDB instance like MongoDB Atlas.
+
+## Database Seeding
+
+To seed the database with sample data, run:
+
+```bash
+npm run seed
+```
+
 ## Getting Started
 
 First, run the development server:
