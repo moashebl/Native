@@ -64,15 +64,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     jwt: async ({ token, user, trigger, session }) => {
       if (user) {
+        // Ensure user has a name, fallback to email prefix if not
+        const userName = user.name || (user.email ? user.email.split('@')[0] : 'User')
+        
         if (!user.name) {
           await connectToDatabase()
           await User.findByIdAndUpdate(user.id, {
-            name: user.name || user.email!.split('@')[0],
+            name: userName,
             role: 'user',
           })
         }
-        token.name = user.name || user.email!.split('@')[0]
-        token.role = (user as { role: string }).role
+        token.name = userName
+        token.role = (user as { role: string }).role || 'user'
       }
 
       if (session?.user?.name && trigger === 'update') {
@@ -82,9 +85,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     session: async ({ session, user, trigger, token }) => {
       session.user.id = token.sub as string
-      session.user.role = token.role as string
-      session.user.name = token.name
-      if (trigger === 'update') {
+      session.user.role = (token.role as string) || 'user'
+      session.user.name = token.name as string
+      if (trigger === 'update' && user?.name) {
         session.user.name = user.name
       }
       return session
