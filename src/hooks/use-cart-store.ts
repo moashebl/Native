@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-import { Cart, OrderItem } from '@/types'
+import { Cart, OrderItem, ShippingAddress } from '@/types'
 import { calcDeliveryDateAndPrice } from '@/lib/actions/order.actions'
 
 const initialState: Cart = {
@@ -11,6 +11,7 @@ const initialState: Cart = {
   shippingPrice: undefined,
   totalPrice: 0,
   paymentMethod: undefined,
+  shippingAddress: undefined,
   deliveryDateIndex: undefined,
 }
 
@@ -18,7 +19,12 @@ interface CartState {
   cart: Cart
   addItem: (item: OrderItem, quantity: number) => Promise<string>
   updateItem: (item: OrderItem, quantity: number) => Promise<void>
-   removeItem: (item: OrderItem) => void
+  removeItem: (item: OrderItem) => Promise<void>
+  clearCart: () => void
+  setShippingAddress: (shippingAddress: ShippingAddress) => Promise<void>
+  setPaymentMethod: (paymentMethod: string) => void
+  setDeliveryDateIndex: (index: number) => Promise<void>
+  init: () => void
 }
 
 const useCartStore = create(
@@ -40,7 +46,7 @@ const useCartStore = create(
             throw new Error('Not enough items in stock')
           }
         } else {
-          if (item.countInStock < item.quantity) {
+          if (item.countInStock < quantity) {
             throw new Error('Not enough items in stock')
           }
         }
@@ -99,6 +105,7 @@ const useCartStore = create(
           },
         })
       },
+      
       removeItem: async (item: OrderItem) => {
         const { items } = get().cart
         const updatedCartItems = items.filter(
@@ -117,6 +124,44 @@ const useCartStore = create(
           },
         })
       },
+
+      clearCart: () => {
+        set({ cart: initialState })
+      },
+
+      setShippingAddress: async (shippingAddress: ShippingAddress) => {
+        set({
+          cart: {
+            ...get().cart,
+            shippingAddress,
+            ...(await calcDeliveryDateAndPrice({
+              items: get().cart.items,
+            })),
+          },
+        })
+      },
+
+      setPaymentMethod: (paymentMethod: string) => {
+        set({
+          cart: {
+            ...get().cart,
+            paymentMethod,
+          },
+        })
+      },
+
+      setDeliveryDateIndex: async (index: number) => {
+        set({
+          cart: {
+            ...get().cart,
+            ...(await calcDeliveryDateAndPrice({
+              items: get().cart.items,
+              deliveryDateIndex: index,
+            })),
+          },
+        })
+      },
+
       init: () => set({ cart: initialState }),
     }),
     {
