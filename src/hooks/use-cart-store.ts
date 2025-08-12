@@ -67,6 +67,8 @@ const useCartStore = create(
             items: updatedCartItems,
             ...(await calcDeliveryDateAndPrice({
               items: updatedCartItems,
+              shippingAddress: get().cart.shippingAddress,
+              deliveryDateIndex: get().cart.deliveryDateIndex,
             })),
           },
         })
@@ -101,6 +103,8 @@ const useCartStore = create(
             items: updatedCartItems,
             ...(await calcDeliveryDateAndPrice({
               items: updatedCartItems,
+              shippingAddress: get().cart.shippingAddress,
+              deliveryDateIndex: get().cart.deliveryDateIndex,
             })),
           },
         })
@@ -120,6 +124,8 @@ const useCartStore = create(
             items: updatedCartItems,
             ...(await calcDeliveryDateAndPrice({
               items: updatedCartItems,
+              shippingAddress: get().cart.shippingAddress,
+              deliveryDateIndex: get().cart.deliveryDateIndex,
             })),
           },
         })
@@ -136,6 +142,8 @@ const useCartStore = create(
             shippingAddress,
             ...(await calcDeliveryDateAndPrice({
               items: get().cart.items,
+              shippingAddress,
+              deliveryDateIndex: get().cart.deliveryDateIndex,
             })),
           },
         })
@@ -156,6 +164,7 @@ const useCartStore = create(
             ...get().cart,
             ...(await calcDeliveryDateAndPrice({
               items: get().cart.items,
+              shippingAddress: get().cart.shippingAddress,
               deliveryDateIndex: index,
             })),
           },

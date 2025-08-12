@@ -72,17 +72,18 @@ export const calcDeliveryDateAndPrice = async ({
         : deliveryDateIndex
     ]
 
-  const shippingPrice = !shippingAddress || !deliveryDate
-    ? 0
-    : deliveryDate.freeShippingMinPrice > 0 &&
-      itemsPrice >= deliveryDate.freeShippingMinPrice
-    ? 0
-    : deliveryDate.shippingPrice
+  const shippingPrice =
+    !shippingAddress || !deliveryDate
+      ? undefined
+      : deliveryDate.freeShippingMinPrice > 0 &&
+        itemsPrice >= deliveryDate.freeShippingMinPrice
+      ? 0
+      : deliveryDate.shippingPrice
 
-  const taxPrice = !shippingAddress ? 0 : round2(itemsPrice * 0.15)
+  const taxPrice = !shippingAddress ? undefined : round2(itemsPrice * 0.15)
 
   const totalPrice = round2(
-    itemsPrice + round2(shippingPrice) + round2(taxPrice)
+    itemsPrice + (shippingPrice ? round2(shippingPrice) : 0) + (taxPrice ? round2(taxPrice) : 0)
   )
 
   return {

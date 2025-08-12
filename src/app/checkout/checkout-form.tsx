@@ -117,13 +117,17 @@ const CheckoutForm = () => {
 
   const handlePlaceOrder = async () => {
     // TODO: place order
+    const idx =
+      deliveryDateIndex === undefined
+        ? AVAILABLE_DELIVERY_DATES.length - 1
+        : deliveryDateIndex
     const res = await createOrder({
       items,
       shippingAddress,
       expectedDeliveryDate: calculateFutureDate(
-        AVAILABLE_DELIVERY_DATES[deliveryDateIndex!].daysToDeliver
+        AVAILABLE_DELIVERY_DATES[idx].daysToDeliver
       ),
-      deliveryDateIndex,
+      deliveryDateIndex: idx,
       paymentMethod,
       itemsPrice,
       shippingPrice,
@@ -135,7 +139,7 @@ const CheckoutForm = () => {
     } else {
       toast.success(res.message)
       clearCart()
-      router.push(`/checkout/${res.data?.orderId}`)
+      router.push(`/`)
     }
   }
   const handleSelectPaymentMethod = () => {
@@ -488,7 +492,7 @@ const CheckoutForm = () => {
           </div>
           {/* items and delivery date */}
           <div>
-            {isDeliveryDateSelected && deliveryDateIndex != undefined ? (
+            {isDeliveryDateSelected && (deliveryDateIndex ?? 0) >= 0 ? (
               <div className='grid  grid-cols-1 md:grid-cols-12  my-3 pb-3'>
                 <div className='flex text-lg font-bold  col-span-5'>
                   <span className='w-8'>3 </span>
@@ -500,8 +504,9 @@ const CheckoutForm = () => {
                     {
                       formatDateTime(
                         calculateFutureDate(
-                          AVAILABLE_DELIVERY_DATES[deliveryDateIndex]
-                            .daysToDeliver
+                          AVAILABLE_DELIVERY_DATES[
+                            deliveryDateIndex ?? AVAILABLE_DELIVERY_DATES.length - 1
+                          ].daysToDeliver
                         )
                       ).dateOnly
                     }
@@ -540,8 +545,9 @@ const CheckoutForm = () => {
                         {
                           formatDateTime(
                             calculateFutureDate(
-                              AVAILABLE_DELIVERY_DATES[deliveryDateIndex!]
-                                .daysToDeliver
+                              AVAILABLE_DELIVERY_DATES[
+                                deliveryDateIndex ?? AVAILABLE_DELIVERY_DATES.length - 1
+                              ].daysToDeliver
                             )
                           ).dateOnly
                         }
@@ -609,8 +615,9 @@ const CheckoutForm = () => {
                           <ul>
                             <RadioGroup
                               value={
-                                AVAILABLE_DELIVERY_DATES[deliveryDateIndex!]
-                                  .name
+                                AVAILABLE_DELIVERY_DATES[
+                                  deliveryDateIndex ?? AVAILABLE_DELIVERY_DATES.length - 1
+                                ].name
                               }
                               onValueChange={(value) =>
                                 setDeliveryDateIndex(
