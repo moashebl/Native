@@ -11,12 +11,14 @@ export default function Header() {
       <div className='px-2'>
         <div className='flex items-center justify-between'>
           <div className='flex items-center'>
-            <Link
-              href='/'
-              className='flex items-center header-button font-extrabold text-2xl m-1 '
-            >
-              <span className="text-3xl font-extrabold">Native</span>
-            </Link>
+                         <Link
+               href='/'
+               className='flex items-center header-button m-1'
+             >
+               <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent">
+                 Native
+               </h1>
+             </Link>
           </div>
           <div className='hidden md:block flex-1 max-w-xl'>
             <Search />
