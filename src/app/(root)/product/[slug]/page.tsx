@@ -9,11 +9,14 @@ import ProductPrice from '@/components/shared/product/product-price'
 import ProductGallery from '@/components/shared/product/product-gallery'
 import { Separator } from '@/components/ui/separator'
 import ProductSlider from '@/components/shared/product/product-slider'
-import Rating from '@/components/shared/product/rating'
+import RatingSummary from '@/components/shared/product/rating-summary'
+import ReviewList from './review-list'
 import BrowsingHistoryList from '@/components/shared/browsing-history-list'
 import AddToBrowsingHistory from '@/components/shared/product/add-to-browsing-history'
 import { generateId, round2 } from '@/lib/utils'
 import AddToCart from '@/components/shared/product/add-to-cart'
+import { auth } from '@/../../auth'
+
 
 export async function generateMetadata(props: {
   params: Promise<{ slug: string }>
@@ -48,6 +51,7 @@ export default async function ProductDetails(props: {
     productId: product._id,
     page: Number(page || '1'),
   })
+  const session = await auth()
 
   return (
     <div>
@@ -67,9 +71,13 @@ export default async function ProductDetails(props: {
                 {product.name}
               </h1>
               <div className='flex items-center gap-2'>
-                <span>{product.avgRating.toFixed(1)}</span>
-                <Rating rating={product.avgRating} />
-                <span>{product.numReviews} ratings</span>
+              <RatingSummary
+                avgRating={product.avgRating}
+                numReviews={product.numReviews}
+                asPopover
+                ratingDistribution={product.ratingDistribution}
+              />
+
               </div>
               <Separator />
               <div className='flex flex-col gap-3 sm:flex-row sm:items-center'>
@@ -141,7 +149,12 @@ export default async function ProductDetails(props: {
           </div>
         </div>
       </section>
-
+      <section className='mt-10'>
+        <h2 className='h2-bold mb-2' id='reviews'>
+          Customer Reviews
+        </h2>
+        <ReviewList product={product} userId={session?.user.id} />
+      </section>
       <section className='mt-10'>
         <ProductSlider
           products={relatedProducts.data}
