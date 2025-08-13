@@ -42,7 +42,7 @@ import {
   AVAILABLE_PAYMENT_METHODS,
   DEFAULT_PAYMENT_METHOD,
 } from '@/lib/constants'
-import { toast } from 'sonner'
+import { toast } from '@/hooks/use-toast'
 import { createOrder } from '@/lib/actions/order.actions'
 
 const shippingAddressDefaultValues =
@@ -88,6 +88,13 @@ const CheckoutForm = () => {
     clearCart,
   } = useCartStore()
   const isMounted = useIsMounted()
+  
+  // Set default delivery date index if not set
+  useEffect(() => {
+    if (deliveryDateIndex === undefined) {
+      setDeliveryDateIndex(0) // Default to first delivery option
+    }
+  }, [deliveryDateIndex, setDeliveryDateIndex])
 
   const shippingAddressForm = useForm<ShippingAddress>({
     resolver: zodResolver(ShippingAddressSchema),
@@ -116,18 +123,23 @@ const CheckoutForm = () => {
     useState<boolean>(false)
 
   const handlePlaceOrder = async () => {
+    if (deliveryDateIndex === undefined) {
+      toast({
+        title: 'Error',
+        description: 'Please select a delivery date',
+        variant: 'destructive',
+      })
+      return
+    }
+    
     // TODO: place order
-    const idx =
-      deliveryDateIndex === undefined
-        ? AVAILABLE_DELIVERY_DATES.length - 1
-        : deliveryDateIndex
     const res = await createOrder({
       items,
       shippingAddress,
       expectedDeliveryDate: calculateFutureDate(
-        AVAILABLE_DELIVERY_DATES[idx].daysToDeliver
+        AVAILABLE_DELIVERY_DATES[deliveryDateIndex].daysToDeliver
       ),
-      deliveryDateIndex: idx,
+      deliveryDateIndex,
       paymentMethod,
       itemsPrice,
       shippingPrice,
@@ -135,11 +147,19 @@ const CheckoutForm = () => {
       totalPrice,
     })
     if (!res.success) {
-      toast.error(res.message)
+      toast({
+        title: 'Error',
+        description: res.message,
+        variant: 'destructive',
+      })
     } else {
-      toast.success(res.message)
+      toast({
+        title: 'Success',
+        description: res.message,
+        variant: 'default',
+      })
       clearCart()
-      router.push(`/`)
+      router.push(`/checkout/${res.data?.orderId}`)
     }
   }
   const handleSelectPaymentMethod = () => {
@@ -149,94 +169,8 @@ const CheckoutForm = () => {
   const handleSelectShippingAddress = () => {
     shippingAddressForm.handleSubmit(onSubmitShippingAddress)()
   }
-  const CheckoutSummary = () => (
-    <Card>
-      <CardContent className='p-4'>
-        {!isAddressSelected && (
-          <div className='border-b mb-4'>
-            <Button
-              className='rounded-full w-full'
-              onClick={handleSelectShippingAddress}
-            >
-              Ship to this address
-            </Button>
-            <p className='text-xs text-center py-2'>
-              Choose a shipping address and payment method in order to calculate
-              shipping, handling, and tax.
-            </p>
-          </div>
-        )}
-        {isAddressSelected && !isPaymentMethodSelected && (
-          <div className=' mb-4'>
-            <Button
-              className='rounded-full w-full'
-              onClick={handleSelectPaymentMethod}
-            >
-              Use this payment method
-            </Button>
 
-            <p className='text-xs text-center py-2'>
-              Choose a payment method to continue checking out. You&apos;ll
-              still have a chance to review and edit your order before it&apos;s
-              final.
-            </p>
-          </div>
-        )}
-        {isPaymentMethodSelected && isAddressSelected && (
-          <div>
-            <Button onClick={handlePlaceOrder} className='rounded-full w-full'>
-              Place Your Order
-            </Button>
-            <p className='text-xs text-center py-2'>
-              By placing your order, you agree to {APP_NAME}&apos;s{' '}
-              <Link href='/page/privacy-policy'>privacy notice</Link> and
-              <Link href='/page/conditions-of-use'> conditions of use</Link>.
-            </p>
-          </div>
-        )}
 
-        <div>
-          <div className='text-lg font-bold'>Order Summary</div>
-          <div className='space-y-2'>
-            <div className='flex justify-between'>
-              <span>Items:</span>
-              <span>
-                <ProductPrice price={itemsPrice} plain />
-              </span>
-            </div>
-            <div className='flex justify-between'>
-              <span>Shipping & Handling:</span>
-              <span>
-                {shippingPrice === undefined ? (
-                  '--'
-                ) : shippingPrice === 0 ? (
-                  'FREE'
-                ) : (
-                  <ProductPrice price={shippingPrice} plain />
-                )}
-              </span>
-            </div>
-            <div className='flex justify-between'>
-              <span> Tax:</span>
-              <span>
-                {taxPrice === undefined ? (
-                  '--'
-                ) : (
-                  <ProductPrice price={taxPrice} plain />
-                )}
-              </span>
-            </div>
-            <div className='flex justify-between  pt-4 font-bold text-lg'>
-              <span> Order Total:</span>
-              <span>
-                <ProductPrice price={totalPrice} plain />
-              </span>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
 
   return (
     <main className='max-w-6xl mx-auto highlight-link'>
@@ -492,7 +426,7 @@ const CheckoutForm = () => {
           </div>
           {/* items and delivery date */}
           <div>
-            {isDeliveryDateSelected && (deliveryDateIndex ?? 0) >= 0 ? (
+            {isDeliveryDateSelected && deliveryDateIndex != undefined ? (
               <div className='grid  grid-cols-1 md:grid-cols-12  my-3 pb-3'>
                 <div className='flex text-lg font-bold  col-span-5'>
                   <span className='w-8'>3 </span>
@@ -504,9 +438,8 @@ const CheckoutForm = () => {
                     {
                       formatDateTime(
                         calculateFutureDate(
-                          AVAILABLE_DELIVERY_DATES[
-                            deliveryDateIndex ?? AVAILABLE_DELIVERY_DATES.length - 1
-                          ].daysToDeliver
+                          AVAILABLE_DELIVERY_DATES[deliveryDateIndex]
+                            .daysToDeliver
                         )
                       ).dateOnly
                     }
@@ -539,22 +472,23 @@ const CheckoutForm = () => {
                 </div>
                 <Card className='md:ml-8'>
                   <CardContent className='p-4'>
-                    <p className='mb-2'>
-                      <span className='text-lg font-bold text-green-700'>
-                        Arriving{' '}
-                        {
-                          formatDateTime(
-                            calculateFutureDate(
-                              AVAILABLE_DELIVERY_DATES[
-                                deliveryDateIndex ?? AVAILABLE_DELIVERY_DATES.length - 1
-                              ].daysToDeliver
-                            )
-                          ).dateOnly
-                        }
-                      </span>{' '}
-                      If you order in the next {timeUntilMidnight().hours} hours
-                      and {timeUntilMidnight().minutes} minutes.
-                    </p>
+                                          <p className='mb-2'>
+                        <span className='text-lg font-bold text-green-700'>
+                          Arriving{' '}
+                          {deliveryDateIndex !== undefined && AVAILABLE_DELIVERY_DATES[deliveryDateIndex] ? (
+                            formatDateTime(
+                              calculateFutureDate(
+                                AVAILABLE_DELIVERY_DATES[deliveryDateIndex]
+                                  .daysToDeliver
+                              )
+                            ).dateOnly
+                          ) : (
+                            'Select delivery date'
+                          )}
+                        </span>{' '}
+                        If you order in the next {timeUntilMidnight().hours} hours
+                        and {timeUntilMidnight().minutes} minutes.
+                      </p>
                     <div className='grid md:grid-cols-2 gap-6'>
                       <div>
                         {items.map((item, _index) => (
@@ -613,20 +547,20 @@ const CheckoutForm = () => {
                           <p className='mb-2'> Choose a shipping speed:</p>
 
                           <ul>
-                            <RadioGroup
-                              value={
-                                AVAILABLE_DELIVERY_DATES[
-                                  deliveryDateIndex ?? AVAILABLE_DELIVERY_DATES.length - 1
-                                ].name
-                              }
-                              onValueChange={(value) =>
-                                setDeliveryDateIndex(
-                                  AVAILABLE_DELIVERY_DATES.findIndex(
-                                    (address) => address.name === value
-                                  )!
-                                )
-                              }
-                            >
+                                                          <RadioGroup
+                                value={
+                                  deliveryDateIndex !== undefined && AVAILABLE_DELIVERY_DATES[deliveryDateIndex]
+                                    ? AVAILABLE_DELIVERY_DATES[deliveryDateIndex].name
+                                    : AVAILABLE_DELIVERY_DATES[0].name
+                                }
+                                onValueChange={(value) =>
+                                  setDeliveryDateIndex(
+                                    AVAILABLE_DELIVERY_DATES.findIndex(
+                                      (address) => address.name === value
+                                    )
+                                  )
+                                }
+                              >
                               {AVAILABLE_DELIVERY_DATES.map((dd) => (
                                 <div key={dd.name} className='flex'>
                                   <RadioGroupItem
@@ -678,7 +612,92 @@ const CheckoutForm = () => {
           {isPaymentMethodSelected && isAddressSelected && (
             <div className='mt-6'>
               <div className='block md:hidden'>
-                <CheckoutSummary />
+                <Card>
+                  <CardContent className='p-4'>
+                    {!isAddressSelected && (
+                      <div className='border-b mb-4'>
+                        <Button
+                          className='rounded-full w-full'
+                          onClick={handleSelectShippingAddress}
+                        >
+                          Ship to this address
+                        </Button>
+                        <p className='text-xs text-center py-2'>
+                          Choose a shipping address and payment method in order to calculate
+                          shipping, handling, and tax.
+                        </p>
+                      </div>
+                    )}
+                    {isAddressSelected && !isPaymentMethodSelected && (
+                      <div className=' mb-4'>
+                        <Button
+                          className='rounded-full w-full'
+                          onClick={handleSelectPaymentMethod}
+                        >
+                          Use this payment method
+                        </Button>
+
+                        <p className='text-xs text-center py-2'>
+                          Choose a payment method to continue checking out. You&apos;ll
+                          still have a chance to review and edit your order before it&apos;s
+                          final.
+                        </p>
+                      </div>
+                    )}
+                    {isPaymentMethodSelected && isAddressSelected && (
+                      <div>
+                        <Button onClick={handlePlaceOrder} className='rounded-full w-full'>
+                          Place Your Order
+                        </Button>
+                        <p className='text-xs text-center py-2'>
+                          By placing your order, you agree to {APP_NAME}&apos;s{' '}
+                          <Link href='/page/privacy-policy'>privacy notice</Link> and
+                          <Link href='/page/conditions-of-use'> conditions of use</Link>.
+                        </p>
+                      </div>
+                    )}
+
+                    <div>
+                      <div className='text-lg font-bold'>Order Summary</div>
+                      <div className='space-y-2'>
+                        <div className='flex justify-between'>
+                          <span>Items:</span>
+                          <span>
+                            <ProductPrice price={itemsPrice} plain />
+                          </span>
+                        </div>
+                        <div className='flex justify-between'>
+                          <span>Shipping & Handling:</span>
+                          <span>
+                            {shippingPrice === undefined ? (
+                              '--'
+                            ) : shippingPrice === 0 ? (
+                              'FREE'
+                            ) : (
+                              <ProductPrice price={shippingPrice} plain />
+                            )}
+                          </span>
+                        </div>
+                        <div className='flex justify-between'>
+                          <span> Tax:</span>
+                          <span>
+                            {taxPrice === undefined ? (
+                              '--'
+                            ) : (
+                              <ProductPrice price={taxPrice} plain />
+                            )}
+                          </span>
+                        </div>
+                        <div className='flex justify-between  pt-4 font-bold text-lg'>
+                          <span> Order Total:</span>
+                          <span>
+                            <ProductPrice price={totalPrice} plain />
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
 
               <Card className='hidden md:block '>
@@ -709,7 +728,92 @@ const CheckoutForm = () => {
           <CheckoutFooter />
         </div>
         <div className='hidden md:block'>
-          <CheckoutSummary />
+          <Card>
+            <CardContent className='p-4'>
+              {!isAddressSelected && (
+                <div className='border-b mb-4'>
+                  <Button
+                    className='rounded-full w-full'
+                    onClick={handleSelectShippingAddress}
+                  >
+                    Ship to this address
+                  </Button>
+                  <p className='text-xs text-center py-2'>
+                    Choose a shipping address and payment method in order to calculate
+                    shipping, handling, and tax.
+                  </p>
+                </div>
+              )}
+              {isAddressSelected && !isPaymentMethodSelected && (
+                <div className=' mb-4'>
+                  <Button
+                    className='rounded-full w-full'
+                    onClick={handleSelectPaymentMethod}
+                  >
+                    Use this payment method
+                  </Button>
+
+                  <p className='text-xs text-center py-2'>
+                    Choose a payment method to continue checking out. You&apos;ll
+                    still have a chance to review and edit your order before it&apos;s
+                    final.
+                  </p>
+                </div>
+              )}
+              {isPaymentMethodSelected && isAddressSelected && (
+                <div>
+                  <Button onClick={handlePlaceOrder} className='rounded-full w-full'>
+                    Place Your Order
+                  </Button>
+                  <p className='text-xs text-center py-2'>
+                    By placing your order, you agree to {APP_NAME}&apos;s{' '}
+                    <Link href='/page/privacy-policy'>privacy notice</Link> and
+                    <Link href='/page/conditions-of-use'> conditions of use</Link>.
+                  </p>
+                </div>
+              )}
+
+              <div>
+                <div className='text-lg font-bold'>Order Summary</div>
+                <div className='space-y-2'>
+                  <div className='flex justify-between'>
+                    <span>Items:</span>
+                    <span>
+                      <ProductPrice price={itemsPrice} plain />
+                    </span>
+                  </div>
+                  <div className='flex justify-between'>
+                    <span>Shipping & Handling:</span>
+                    <span>
+                      {shippingPrice === undefined ? (
+                        '--'
+                      ) : shippingPrice === 0 ? (
+                        'FREE'
+                      ) : (
+                        <ProductPrice price={shippingPrice} plain />
+                      )}
+                    </span>
+                  </div>
+                  <div className='flex justify-between'>
+                    <span> Tax:</span>
+                    <span>
+                      {taxPrice === undefined ? (
+                        '--'
+                      ) : (
+                        <ProductPrice price={taxPrice} plain />
+                      )}
+                    </span>
+                  </div>
+                  <div className='flex justify-between  pt-4 font-bold text-lg'>
+                    <span> Order Total:</span>
+                    <span>
+                      <ProductPrice price={totalPrice} plain />
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </main>

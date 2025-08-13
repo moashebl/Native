@@ -1,14 +1,14 @@
 'use server'
 import { Cart, OrderItem, ShippingAddress } from '@/types'
-import { formatError, round2 } from '../utils'
+import { formatError , round2 } from '../utils'
 import { AVAILABLE_DELIVERY_DATES } from '../constants'
 import { connectToDatabase } from '../db'
 import { auth } from '../../../auth'
 import { OrderInputSchema } from '../validator'
-import Order from '../db/models/order.model'
-import { paypal } from '../paypal'
-import { sendPurchaseReceipt } from '../../../emails'
+import Order, { IOrder } from '../db/models/order.model'
 import { revalidatePath } from 'next/cache'
+import { sendPurchaseReceipt } from '../../../emails'
+import { paypal } from '../paypal'
 // CREATE
 export const createOrder = async (clientSideCart: Cart) => {
   try {
@@ -55,6 +55,12 @@ export const createOrderFromCart = async (
   })
   return await Order.create(order)
 }
+export async function getOrderById(orderId: string): Promise<IOrder> {
+  await connectToDatabase()
+  const order = await Order.findById(orderId)
+  return JSON.parse(JSON.stringify(order))
+}
+
 export async function createPayPalOrder(orderId: string) {
   await connectToDatabase()
   try {
@@ -117,55 +123,51 @@ export async function approvePayPalOrder(
     return { success: false, message: formatError(err) }
   }
 }
-export const getOrderById = async (orderId: string) => {
-  await connectToDatabase()
-  return await Order.findById(orderId).populate('user', 'email')
-}
-
 export const calcDeliveryDateAndPrice = async ({
-  items,
-  shippingAddress,
-  deliveryDateIndex,
+items,
+shippingAddress,
+deliveryDateIndex,
 }: {
-  deliveryDateIndex?: number
-  items: OrderItem[]
-  shippingAddress?: ShippingAddress
+deliveryDateIndex?: number
+items: OrderItem[]
+shippingAddress?: ShippingAddress
 }) => {
-  const itemsPrice = round2(
-    items.reduce((acc, item) => acc + item.price * item.quantity, 0)
-  )
+const itemsPrice = round2(
+  items.reduce((acc, item) => acc + item.price * item.quantity, 0)
+)
 
-  const deliveryDate =
-    AVAILABLE_DELIVERY_DATES[
-      deliveryDateIndex === undefined
-        ? AVAILABLE_DELIVERY_DATES.length - 1
-        : deliveryDateIndex
-    ]
+const deliveryDate =
+  AVAILABLE_DELIVERY_DATES[
+    deliveryDateIndex === undefined
+      ? AVAILABLE_DELIVERY_DATES.length - 1
+      : deliveryDateIndex
+  ]
+ 
 
-  const shippingPrice =
-    !shippingAddress || !deliveryDate
-      ? undefined
-      : deliveryDate.freeShippingMinPrice > 0 &&
-        itemsPrice >= deliveryDate.freeShippingMinPrice
-      ? 0
-      : deliveryDate.shippingPrice
+const shippingPrice =
+  !shippingAddress || !deliveryDate
+    ? undefined
+    : deliveryDate.freeShippingMinPrice > 0 &&
+      itemsPrice >= deliveryDate.freeShippingMinPrice
+    ? 0
+    : deliveryDate.shippingPrice
 
-  const taxPrice = !shippingAddress ? undefined : round2(itemsPrice * 0.15)
+const taxPrice = !shippingAddress ? undefined : round2(itemsPrice * 0.15)
 
-  const totalPrice = round2(
-    itemsPrice + (shippingPrice ? round2(shippingPrice) : 0) + (taxPrice ? round2(taxPrice) : 0)
-  )
-
-  return {
-    AVAILABLE_DELIVERY_DATES,
-    deliveryDate,
-    deliveryDateIndex:
-      deliveryDateIndex === undefined
-        ? AVAILABLE_DELIVERY_DATES.length - 1
-        : deliveryDateIndex,
-    itemsPrice,
-    shippingPrice,
-    taxPrice,
-    totalPrice,
+const totalPrice = round2(
+  itemsPrice +
+    (shippingPrice ? round2(shippingPrice) : 0) +
+    (taxPrice ? round2(taxPrice) : 0)
+)
+return {
+  AVAILABLE_DELIVERY_DATES,
+  deliveryDateIndex:
+    deliveryDateIndex === undefined
+      ? AVAILABLE_DELIVERY_DATES.length - 1
+      : deliveryDateIndex,
+  itemsPrice,
+  shippingPrice,
+  taxPrice,
+  totalPrice,
   }
 }
