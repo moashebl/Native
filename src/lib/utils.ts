@@ -1,6 +1,30 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import qs from 'query-string'
+import { OrderItem, ShippingAddress } from '@/types'
+import { AVAILABLE_DELIVERY_DATES } from './constants'
 
+export function formUrlQuery({
+  params,
+  key,
+  value,
+}: {
+  params: string
+  key: string
+  value: string | null
+}) {
+  const currentUrl = qs.parse(params)
+
+  currentUrl[key] = value
+
+  return qs.stringifyUrl(
+    {
+      url: window.location.pathname,
+      query: currentUrl,
+    },
+    { skipNull: true }
+  )
+}
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -131,4 +155,53 @@ export const formatDateTime = (dateString: Date) => {
 }
 export function formatId(id: string) {
   return `..${id.substring(id.length - 6)}`
+}
+
+export const calcDeliveryDateAndPrice = ({
+  items,
+  shippingAddress,
+  deliveryDateIndex,
+}: {
+  deliveryDateIndex?: number
+  items: OrderItem[]
+  shippingAddress?: ShippingAddress
+}) => {
+  const itemsPrice = round2(
+    items.reduce((acc, item) => acc + item.price * item.quantity, 0)
+  )
+
+  const deliveryDate =
+    AVAILABLE_DELIVERY_DATES[
+      deliveryDateIndex === undefined
+        ? AVAILABLE_DELIVERY_DATES.length - 1
+        : deliveryDateIndex
+    ]
+
+  const shippingPrice =
+    !shippingAddress || !deliveryDate
+      ? undefined
+      : deliveryDate.freeShippingMinPrice > 0 &&
+        itemsPrice >= deliveryDate.freeShippingMinPrice
+      ? 0
+      : deliveryDate.shippingPrice
+
+  const taxPrice = !shippingAddress ? undefined : round2(itemsPrice * 0.15)
+
+  const totalPrice = round2(
+    itemsPrice +
+      (shippingPrice ? round2(shippingPrice) : 0) +
+      (taxPrice ? round2(taxPrice) : 0)
+  )
+  return {
+    AVAILABLE_DELIVERY_DATES,
+    deliveryDateIndex:
+      deliveryDateIndex === undefined
+        ? AVAILABLE_DELIVERY_DATES.length - 1
+        : deliveryDateIndex,
+    itemsPrice,
+    shippingPrice,
+    taxPrice,
+    totalPrice,
+    expectedDeliveryDate: deliveryDate ? calculateFutureDate(deliveryDate.daysToDeliver) : undefined,
+  }
 }
