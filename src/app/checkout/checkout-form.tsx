@@ -473,7 +473,7 @@ const CheckoutForm = () => {
                 <Card className='md:ml-8'>
                   <CardContent className='p-4'>
                                           <p className='mb-2'>
-                        <span className='text-lg font-bold text-green-700'>
+                        <span className='text-lg font-bold text-Violet-700'>
                           Arriving{' '}
                           {deliveryDateIndex !== undefined && AVAILABLE_DELIVERY_DATES[deliveryDateIndex] ? (
                             formatDateTime(
@@ -571,7 +571,7 @@ const CheckoutForm = () => {
                                     className='pl-2 space-y-2 cursor-pointer'
                                     htmlFor={`address-${dd.name}`}
                                   >
-                                    <div className='text-green-700 font-semibold'>
+                                    <div className='text-Violet-700 font-semibold'>
                                       {
                                         formatDateTime(
                                           calculateFutureDate(dd.daysToDeliver)

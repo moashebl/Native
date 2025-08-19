@@ -37,7 +37,7 @@ export default function CartAddItem({ itemId }: { itemId: string }) {
             </Link>
             <div>
               <h3 className='text-xl font-bold flex gap-2 my-2'>
-                <CheckCircle2Icon className='h-6 w-6 text-green-700' />
+                <CheckCircle2Icon className='h-6 w-6 text-Violet-700' />
                 Added to cart
               </h3>
               <p className='text-sm'>
@@ -58,7 +58,7 @@ export default function CartAddItem({ itemId }: { itemId: string }) {
                 {itemsPrice < FREE_SHIPPING_MIN_PRICE ? (
                   <div className='text-center '>
                     Add
-                    <span className='text-green-700'>
+                    <span className='text-Violet-700'>
                       <ProductPrice
                         price={FREE_SHIPPING_MIN_PRICE - itemsPrice}
                         plain
@@ -69,7 +69,7 @@ export default function CartAddItem({ itemId }: { itemId: string }) {
                 ) : (
                   <div className='flex items-center'>
                     <div>
-                      <span className='text-green-700'>
+                      <span className='text-Violet-700'>
                         Your order qualifies for FREE Shipping.
                       </span>{' '}
                       Choose this option at checkout.

@@ -287,7 +287,7 @@ const products: IProductInput[] = [
     description:
       'Made with chemicals safer for human health and the environment',
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
-    colors: ['Green', 'Red', 'Black'],
+    colors: ['Violet', 'Red', 'Black'],
 
     reviews: [],
   },
@@ -349,7 +349,7 @@ const products: IProductInput[] = [
     description:
       'The Jerzees long sleeve t-shirt is made with dri-power technology that wicks away moisture to keep you cool and dry throughout your day. We also included a rib collar and cuffs for added durability, and a lay-flat collar for comfort. If you are looking for a versatile shirt that you can wear throughout the transitioning seasons, then look no further.',
     sizes: ['XL', 'XXL'],
-    colors: ['Green', 'White'],
+    colors: ['Violet', 'White'],
 
     reviews: [],
   },
@@ -409,7 +409,7 @@ const products: IProductInput[] = [
     description:
       "Slim Fit Design:Men's Muscle Slim Fit Button Henley Shirts are designed to fit snugly against your body, accentuating your muscles and creating a sleek silhouette that's perfect for any occasion. ",
     sizes: ['XL', 'XXL'],
-    colors: ['Green', 'Yellow'],
+    colors: ['Violet', 'Yellow'],
 
     reviews: [],
   },
@@ -968,7 +968,7 @@ const products: IProductInput[] = [
     description:
       'Cloudfoam Comfort sockliner is ultra-soft and plush, with two layers of cushioning topped with soft, breathable mesh',
     sizes: ['8', '9', '10', '11'],
-    colors: ['Green', 'Black', 'Grey'],
+    colors: ['Violet', 'Black', 'Grey'],
 
     reviews: [],
   },

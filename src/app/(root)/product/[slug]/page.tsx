@@ -117,7 +117,7 @@ export default async function ProductDetails(props: {
                   </div>
                 )}
                 {product.countInStock !== 0 ? (
-                  <div className='text-green-700 text-xl'>In Stock</div>
+                  <div className='text-Violet-700 text-xl'>In Stock</div>
                 ) : (
                   <div className='text-destructive text-xl'>
                     Out of Stock

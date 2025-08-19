@@ -58,7 +58,7 @@ export default function ThemeSwitcher() {
           {availableColors.map((c) => (
             <DropdownMenuRadioItem key={c.name} value={c.name}>
               <div
-                style={{ backgroundColor: c.name }}
+                style={{ backgroundColor: c.name === 'Gold' ? '#d4af37' : c.name === 'Violet' ? '#8b5cf6' : c.name === 'Red' ? '#ef4444' : c.name.toLowerCase() }}
                 className='h-4 w-4 mr-1 rounded-full'
               ></div>
 

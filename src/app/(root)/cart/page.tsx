@@ -150,7 +150,7 @@ export default function CartPage() {
                   {itemsPrice < FREE_SHIPPING_MIN_PRICE ? (
                     <div className='flex-1'>
                       Add{' '}
-                      <span className='text-green-700'>
+                      <span className='text-Violet-700'>
                         <ProductPrice
                           price={FREE_SHIPPING_MIN_PRICE - itemsPrice}
                           plain
@@ -161,7 +161,7 @@ export default function CartPage() {
                     </div>
                   ) : (
                     <div className='flex-1'>
-                      <span className='text-green-700'>
+                      <span className='text-Violet-700'>
                         Your order qualifies for FREE Shipping
                       </span>{' '}
                       Choose this option at checkout

@@ -1,3 +1,4 @@
+import CartButton from './cart-button'
 import { EllipsisVertical } from 'lucide-react'
 import {
   Sheet,
@@ -9,15 +10,14 @@ import {
 } from '@/components/ui/sheet'
 import ThemeSwitcher from './theme-switcher'
 import UserButton from './user-button'
-import CartButton from './cart-button'
 
-const Menu = ({ forAdmin = false }: { forAdmin?: boolean }) => {
+const Menu = () => {
   return (
     <div className='flex justify-end'>
       <nav className='md:flex gap-3 hidden w-full'>
         <ThemeSwitcher />
-
-        {forAdmin ? null : <CartButton />}
+        <UserButton />
+        <CartButton />
       </nav>
       <nav className='md:hidden'>
         <Sheet>
@@ -39,5 +39,5 @@ const Menu = ({ forAdmin = false }: { forAdmin?: boolean }) => {
       </nav>
     </div>
   )
-}         
+}        
 export default Menu
