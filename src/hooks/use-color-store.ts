@@ -243,32 +243,20 @@ export default function useColorStore(theme: string = 'light') {
   
   // Use the static availableColors array instead of the one from state
   const getColor = () => {
-    console.log('getColor called with state:', {
-      userColor: colorState.userColor,
-      defaultColor: colorState.defaultColor,
-      availableColors: colorState.availableColors.map(c => c.name)
-    })
-    
     const userColor = availableColors.find(
       (t) => t.name === colorState.userColor
     )
-    console.log('Searching for userColor:', colorState.userColor, 'in colors:', availableColors.map(c => `"${c.name}"`))
     if (userColor) {
-      console.log('Found userColor:', userColor.name)
       return userColor
-    } else if (colorState.userColor) {
-      console.log('Could not find userColor:', colorState.userColor)
     }
     
     const defaultColor = availableColors.find(
       (t) => t.name === colorState.defaultColor
     )
     if (defaultColor) {
-      console.log('Found defaultColor:', defaultColor.name)
       return defaultColor
     }
 
-    console.log('Falling back to first color:', availableColors[0]?.name)
     return availableColors[0]
   }
 
@@ -281,15 +269,9 @@ export default function useColorStore(theme: string = 'light') {
     color,
     getColor,
     setColor: (name: string, isUserColor?: boolean) => {
-      console.log('Setting color to:', name, 'isUserColor:', isUserColor)
-      console.log('Available colors:', availableColors.map(c => c.name))
-      console.log('Current state before update:', colorStore.getState())
-      
       colorStore.setState(
         isUserColor ? { userColor: name } : { defaultColor: name }
       )
-      
-      console.log('Current state after update:', colorStore.getState())
     },
     updateCssVariables: (currentTheme?: string) => {
       const color = getColor()
@@ -297,17 +279,8 @@ export default function useColorStore(theme: string = 'light') {
       const colors: { [key: string]: string } =
         themeToUse === 'dark' ? color.dark : color.root
       
-      console.log('updateCssVariables called with:', {
-        currentTheme,
-        theme,
-        themeToUse,
-        colorName: color.name,
-        colorsToApply: Object.keys(colors).length
-      })
-      
       for (const key in colors) {
         document.documentElement.style.setProperty(key, colors[key])
-        console.log(`Setting CSS variable ${key} to ${colors[key]}`)
       }
     },
   }
