@@ -5,6 +5,8 @@ import Link from 'next/link'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
+import ActionButton from '../action-button'
+import { deliverOrder, updateOrderToPaid } from '@/lib/actions/order.actions'
 import {
   Table,
   TableBody,
@@ -20,6 +22,7 @@ import ProductPrice from '../product/product-price'
 
 export default function OrderDetailsForm({
   order,
+  isAdmin,
 }: {
   order: IOrder
   isAdmin: boolean
@@ -160,6 +163,18 @@ export default function OrderDetailsForm({
               >
                 Pay Order
               </Link>
+            )}
+            {isAdmin && !isPaid && paymentMethod === 'Cash On Delivery' && (
+              <ActionButton
+                caption='Mark as paid'
+                action={() => updateOrderToPaid(order._id)}
+              />
+            )}
+            {isAdmin && isPaid && !isDelivered && (
+              <ActionButton
+                caption='Mark as delivered'
+                action={() => deliverOrder(order._id)}
+              />
             )}
           </CardContent>
         </Card>

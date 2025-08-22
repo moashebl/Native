@@ -1,17 +1,18 @@
 import {
     Body,
+    Button,
     Column,
     Container,
     Head,
     Heading,
     Html,
     Img,
+    Link,
     Preview,
     Row,
     Section,
     Tailwind,
     Text,
-    Link,
   } from '@react-email/components'
   
   import { formatCurrency } from '@/lib/utils'
@@ -22,7 +23,7 @@ import {
     order: IOrder
   }
   
-  PurchaseReceiptEmail.PreviewProps = {
+  AskReviewOrderItemsEmail.PreviewProps = {
     order: {
       _id: '123',
       isPaid: true,
@@ -64,17 +65,17 @@ import {
   } satisfies OrderInformationProps
   const dateFormatter = new Intl.DateTimeFormat('en', { dateStyle: 'medium' })
   
-  export default async function PurchaseReceiptEmail({
+  export default async function AskReviewOrderItemsEmail({
     order,
   }: OrderInformationProps) {
     return (
       <Html>
-        <Preview>View order receipt</Preview>
+        <Preview>Review Order Items</Preview>
         <Tailwind>
           <Head />
           <Body className='font-sans bg-white'>
             <Container className='max-w-xl'>
-              <Heading>Purchase Receipt</Heading>
+              <Heading>Review Order Items</Heading>
               <Section>
                 <Row>
                   <Column>
@@ -105,28 +106,33 @@ import {
                 {order.items.map((item) => (
                   <Row key={item.product} className='mt-8'>
                     <Column className='w-20'>
-                     <Link href={`${SERVER_URL}/product/${item.slug}`}>
-                      <Img
-                        width='80'
-                        alt={item.name}
-                        className='rounded'
-                        src={
-                          item.image.startsWith('/')
-                            ? `${SERVER_URL}${item.image}`
-                            : item.image
-                        }
-                      />
+                      <Link href={`${SERVER_URL}/product/${item.slug}`}>
+                        <Img
+                          width='80'
+                          alt={item.name}
+                          className='rounded'
+                          src={
+                            item.image.startsWith('/')
+                              ? `${SERVER_URL}${item.image}`
+                              : item.image
+                          }
+                        />
                       </Link>
                     </Column>
                     <Column className='align-top'>
                       <Link href={`${SERVER_URL}/product/${item.slug}`}>
-                      <Text className='mx-2 my-0'>
-                        {item.name} x {item.quantity}
-                      </Text>
-                    </Link>
+                        <Text className='mx-2 my-0'>
+                          {item.name} x {item.quantity}
+                        </Text>
+                      </Link>
                     </Column>
-                    <Column align='right' className='align-top'>
-                      <Text className='m-0 '>{formatCurrency(item.price)}</Text>
+                    <Column align='right' className='align-top '>
+                      <Button
+                        href={`${SERVER_URL}/product/${item.slug}#reviews`}
+                        className='text-center bg-blue-500 hover:bg-blue-700 text-white   py-2 px-4 rounded'
+                      >
+                        Review this product
+                      </Button>
                     </Column>
                   </Row>
                 ))}
