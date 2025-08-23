@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CartSchema, OrderInputSchema, OrderItemSchema, ProductInputSchema, ReviewInputSchema, ShippingAddressSchema, UserInputSchema, UserNameSchema, UserSignInSchema , UserSignUpSchema } from "@/lib/validator";
+import { CartSchema, OrderInputSchema, OrderItemSchema, ProductInputSchema, ReviewInputSchema, ShippingAddressSchema, UserInputSchema, UserNameSchema, UserSignInSchema , UserSignUpSchema  , WebPageInputSchema} from "@/lib/validator";
 export type IReviewInput = z.infer<typeof ReviewInputSchema>
 export type IReviewDetails = IReviewInput & {
   _id: string
@@ -28,6 +28,7 @@ export type Data = {
       buttonCaption: string
       isPublished: boolean
     }[]
+    webPages: IWebPageInput[]
   }
   //Order
   export type IOrderInput = z.infer<typeof OrderInputSchema>
@@ -47,3 +48,5 @@ export type IUserInput = z.infer<typeof UserInputSchema>
 export type IUserSignIn = z.infer<typeof UserSignInSchema>
 export type IUserSignUp = z.infer<typeof UserSignUpSchema>
 export type IUserName = z.infer<typeof UserNameSchema>
+// webpage
+export type IWebPageInput = z.infer<typeof WebPageInputSchema>

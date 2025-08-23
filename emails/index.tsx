@@ -8,18 +8,24 @@ const resend = new Resend(process.env.RESEND_API_KEY as string)
 
 export const sendPurchaseReceipt = async ({ order }: { order: IOrder }) => {
   try {
+    console.log('Sending purchase receipt for order:', order._id);
+    console.log('Order user data:', JSON.stringify(order.user, null, 2));
+    
     // Populate the user's email if it's not already populated
     let userEmail: string;
     
     if (typeof order.user === 'object' && order.user !== null && 'email' in order.user) {
       // If user is already populated with email
       userEmail = (order.user as { email: string }).email;
+      console.log('Using email from populated user:', userEmail);
     } else {
       // If user is just an ObjectId, we need to fetch the user's email
       const { default: User } = await import('@/lib/db/models/user.model');
+      console.log('Fetching user with ID:', order.user);
       const user = await User.findById(order.user);
       if (!user) throw new Error('User not found');
       userEmail = user.email;
+      console.log('Fetched user email:', userEmail);
     }
 
     if (!userEmail) {

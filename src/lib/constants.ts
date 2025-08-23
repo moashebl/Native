@@ -56,3 +56,4 @@ export const FREE_SHIPPING_MIN_PRICE = Number(
       freeShippingMinPrice: 35,
     },
   ]
+  export const USER_ROLES = ['Admin', 'User']

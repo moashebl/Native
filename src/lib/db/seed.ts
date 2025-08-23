@@ -5,6 +5,7 @@ import { cwd } from 'process'
 import { loadEnvConfig } from '@next/env'
 import User from './models/user.model'
 import Review from './models/review.model'
+import WebPage from './models/web-page.model'
 
 loadEnvConfig(cwd())
 
@@ -13,7 +14,9 @@ const main = async () => {
     // Connect to database first
     await connectToDatabase(process.env.MONGODB_URI)
     
-    const { products, users, reviews } = data    
+    const { products, users, reviews, webPages } = data
+    await WebPage.deleteMany()
+    await WebPage.insertMany(webPages)    
     // Clear existing data
     await User.deleteMany()
     await Product.deleteMany()

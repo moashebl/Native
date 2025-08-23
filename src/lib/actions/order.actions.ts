@@ -414,20 +414,44 @@ export async function getAllOrders({
 export async function updateOrderToPaid(orderId: string) {
   try {
     await connectToDatabase()
-    const order = await Order.findById(orderId).populate<{
-      user: { email: string; name: string }
-    }>('user', 'name email')
+    // First get the order without populating to check if it exists
+    const order = await Order.findById(orderId)
     if (!order) throw new Error('Order not found')
     if (order.isPaid) throw new Error('Order is already paid')
+    
+    // Update order status
     order.isPaid = true
     order.paidAt = new Date()
+    
+    // Save the order first
     await order.save()
-    if (!process.env.MONGODB_URI?.startsWith('mongodb://localhost'))
+    
+    // Update product stock if not in local development
+    if (!process.env.MONGODB_URI?.startsWith('mongodb://localhost')) {
       await updateProductStock(order._id)
-    if (order.user.email) await sendPurchaseReceipt({ order })
+    }
+    
+    // Get the order with populated user data
+    const populatedOrder = await Order.findById(orderId).populate<{
+      user: { email: string; name: string; _id: string }
+    }>('user', 'email name')
+    
+    if (!populatedOrder) {
+      throw new Error('Failed to load order details')
+    }
+    
+    // Send receipt email
+    try {
+      await sendPurchaseReceipt({ order: populatedOrder })
+    } catch (emailError) {
+      console.error('Failed to send purchase receipt:', emailError)
+      // Don't fail the whole operation if email fails
+    }
+    
     revalidatePath(`/account/orders/${orderId}`)
     return { success: true, message: 'Order paid successfully' }
   } catch (err) {
+    console.error('Error in updateOrderToPaid:', err)
     return { success: false, message: formatError(err) }
   }
 }
