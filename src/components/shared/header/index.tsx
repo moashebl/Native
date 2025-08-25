@@ -1,12 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Link from 'next/link'
 import Menu from './menu'
 import Sidebar from './sidebar'
 import { getAllCategories } from '@/lib/actions/product.actions'
+import { getAllWebPages } from '@/lib/actions/web-page.actions'
 import data from '@/lib/data'
 import Search from './search'
 
 export default async function Header() {
   const categories = await getAllCategories()
+  const webPages = await getAllWebPages()
+  const publishedWebPages = webPages.filter((p: any) => p.isPublished)
+  const existingHrefs = new Set(data.headerMenus.map((m) => m.href))
     return (
     <header className='bg-black  text-white'>
       <div className='px-2'>
@@ -43,6 +48,15 @@ export default async function Header() {
               {menu.name}
             </Link>
           ))}
+          {publishedWebPages.map((page: any) => {
+            const href = `/page/${page.slug}`
+            if (existingHrefs.has(href)) return null
+            return (
+              <Link href={href} key={href} className='header-button !p-2'>
+                {page.title}
+              </Link>
+            )
+          })}
         </div>
       </div>
     </header>
