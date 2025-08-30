@@ -79,7 +79,7 @@ export default function CustomerServicePage() {
             <div className="bg-gray-50 p-4 rounded-lg">
               <h3 className="text-xl font-medium mb-2">Email Support</h3>
               <p className="text-gray-700 mb-2">For general inquiries and non-urgent matters:</p>
-              <a href="mailto:support@aldorahouse.com" className="text-blue-600 hover:underline">support@aldorahouse.com</a>
+              <a href="mailto:n8v.store@gmail.com" className="text-blue-600 hover:underline">n8v.store@gmail.com</a>
               <p className="text-gray-500 text-sm mt-2">We typically respond within 24 hours.</p>
             </div>
             

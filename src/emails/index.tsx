@@ -1,56 +1,42 @@
-import { Resend } from 'resend'
-import PurchaseReceiptEmail from './purchase-receipt'
-import AskReviewOrderItemsEmail from './ask-review-order-items'
 import { IOrder } from '@/lib/db/models/order.model'
-import { SENDER_EMAIL, SENDER_NAME } from '@/lib/constants'
-
-const resend = new Resend(process.env.RESEND_API_KEY as string)
+import { emailService } from '@/lib/email-service'
 
 export const sendPurchaseReceipt = async ({ order }: { order: IOrder }) => {
   try {
     console.log('Sending purchase receipt for order:', order._id);
-    console.log('Order user data:', JSON.stringify(order.user, null, 2));
     
-    // Populate the user's email if it's not already populated
-    let userEmail: string;
+    // Use the Nodemailer email service instead of Resend
+    const emailResult = await emailService.sendPurchaseReceiptEmail(order);
     
-    if (typeof order.user === 'object' && order.user !== null && 'email' in order.user) {
-      // If user is already populated with email
-      userEmail = (order.user as { email: string }).email;
-      console.log('Using email from populated user:', userEmail);
+    if (emailResult) {
+      console.log('Purchase receipt email sent successfully');
     } else {
-      // If user is just an ObjectId, we need to fetch the user's email
-      const { default: User } = await import('@/lib/db/models/user.model');
-      console.log('Fetching user with ID:', order.user);
-      const user = await User.findById(order.user);
-      if (!user) throw new Error('User not found');
-      userEmail = user.email;
-      console.log('Fetched user email:', userEmail);
+      console.error('Failed to send purchase receipt email');
     }
-
-    if (!userEmail) {
-      throw new Error('User email not found');
-    }
-
-    await resend.emails.send({
-      from: `${SENDER_NAME} <${SENDER_EMAIL}>`,
-      to: userEmail,
-      subject: `Order Confirmation`,
-      react: <PurchaseReceiptEmail order={order} />,
-    });
+    
+    return emailResult;
   } catch (error) {
     console.error('Error sending purchase receipt:', error);
-    throw error;
+    return false;
   }
 }
 
 export const sendAskReviewOrderItems = async ({ order }: { order: IOrder }) => {
-  const oneDayFromNow = new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString()
-  await resend.emails.send({
-    from: `${SENDER_NAME} <${SENDER_EMAIL}>`,
-    to: (order.user as { email: string }).email,
-    subject: 'Review your order items',
-    react: <AskReviewOrderItemsEmail order={order} />,
-    scheduledAt: oneDayFromNow,
-  })
+  try {
+    console.log('Sending review request for order:', order._id);
+    
+    // Use the Nodemailer email service instead of Resend
+    const emailResult = await emailService.sendAskReviewOrderItemsEmail(order);
+    
+    if (emailResult) {
+      console.log('Review request email sent successfully');
+    } else {
+      console.error('Failed to send review request email');
+    }
+    
+    return emailResult;
+  } catch (error) {
+    console.error('Error sending review request:', error);
+    return false;
+  }
 }

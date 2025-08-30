@@ -126,7 +126,7 @@ export default function HelpPage() {
           <div className="grid md:grid-cols-2 gap-6">
             <div className="bg-gray-50 p-4 rounded-lg">
               <h3 className="text-xl font-medium mb-2">Email Us</h3>
-              <a href="mailto:help@aldorahouse.com" className="text-blue-600 hover:underline">help@aldorahouse.com</a>
+              <a href="mailto:n8v.store@gmail.com" className="text-blue-600 hover:underline">n8v.store@gmail.com</a>
             </div>
             
             <div className="bg-gray-50 p-4 rounded-lg">

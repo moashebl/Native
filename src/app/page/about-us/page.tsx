@@ -55,7 +55,7 @@ export default function AboutUsPage() {
           <h2 className="text-2xl font-semibold mb-3">Contact Us</h2>
           <p className="text-gray-700">
             Have questions or feedback? We would love to hear from you! Reach out to our customer service team at 
-            <a href="mailto:support@aldorahouse.com" className="text-blue-600 hover:underline"> support@aldorahouse.com</a> or 
+            <a href="mailto:n8v.store@gmail.com" className="text-blue-600 hover:underline">n8v.store@gmail.com</a> or 
             call us at <span className="font-medium">1-800-ALDORA-H</span>.
           </p>
         </section>

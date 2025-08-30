@@ -214,8 +214,17 @@ export const formatError = (error: any): string => {
 
 export function calculateFutureDate(days: number) {
   const currentDate = new Date()
-  currentDate.setDate(currentDate.getDate() + days)
-  return currentDate
+  console.log('calculateFutureDate called with days:', days)
+  console.log('Current date before calculation:', currentDate.toISOString())
+  
+  // Use a more reliable method to add days
+  const futureDate = new Date(currentDate.getTime() + (days * 24 * 60 * 60 * 1000))
+  
+  console.log('Future date after calculation:', futureDate.toISOString())
+  console.log('Time difference in milliseconds:', futureDate.getTime() - currentDate.getTime())
+  console.log('Time difference in days:', (futureDate.getTime() - currentDate.getTime()) / (24 * 60 * 60 * 1000))
+  
+  return futureDate
 }
 
 export function calculatePastDate(days: number) {
@@ -257,14 +266,24 @@ export const calcDeliveryDateAndPrice = ({
         ? availableDeliveryDates.length - 1
         : deliveryDateIndex
     ]
+  
+  console.log('Selected delivery date index:', deliveryDateIndex)
+  console.log('Available delivery dates:', availableDeliveryDates)
+  console.log('Selected delivery date:', deliveryDate)
+  console.log('Days to deliver:', deliveryDate?.daysToDeliver)
 
   const shippingPrice =
     !shippingAddress || !deliveryDate
       ? undefined
       : deliveryDate.freeShippingMinPrice > 0 &&
         itemsPrice >= deliveryDate.freeShippingMinPrice
-      ? 0
+      ? 0  // Free shipping only for this specific delivery option
       : deliveryDate.shippingPrice
+
+  console.log('Items price:', itemsPrice)
+  console.log('Delivery option:', deliveryDate?.name)
+  console.log('Free shipping threshold:', deliveryDate?.freeShippingMinPrice)
+  console.log('Shipping price calculated:', shippingPrice)
 
   const taxPrice = !shippingAddress ? undefined : round2(itemsPrice * 0.15)
 

@@ -125,7 +125,7 @@ export default function PrivacyPolicyPage() {
           <h2 className="text-2xl font-semibold mb-3">Contact Us</h2>
           <p className="text-gray-700">
             If you have any questions about this Privacy Policy, please contact us at:
-            <a href="mailto:privacy@aldorahouse.com" className="text-blue-600 hover:underline ml-1">privacy@aldorahouse.com</a>
+            <a href="mailto:n8v.store@gmail.com" className="text-blue-600 hover:underline ml-1">n8v.store@gmail.com</a>
           </p>
         </section>
       </div>

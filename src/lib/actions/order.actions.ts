@@ -9,7 +9,8 @@ import { auth } from '../../../auth'
 import { OrderInputSchema } from '../validator'
 import Order, { IOrder } from '../db/models/order.model'
 import { revalidatePath } from 'next/cache'
-import { sendAskReviewOrderItems, sendPurchaseReceipt } from '@/emails'
+import { sendAskReviewOrderItems } from '@/emails'
+import { emailService } from '../email-service'
 
 import { Cart, IOrderList } from '@/types'  
 import { DateRange } from 'react-day-picker'
@@ -243,6 +244,23 @@ export const createOrder = async (clientSideCart: Cart) => {
       clientSideCart,
       session.user.id!
     )
+    
+    // Send order confirmation email
+    try {
+      console.log('Sending order confirmation email...')
+      // Populate the user data before sending email
+      const populatedOrder = await Order.findById(createdOrder._id).populate('user', 'email')
+      if (populatedOrder) {
+        const emailResult = await emailService.sendOrderConfirmationEmail(populatedOrder)
+        console.log('Order confirmation email result:', emailResult)
+      } else {
+        console.error('Failed to populate order for email')
+      }
+    } catch (emailError) {
+      console.error('Failed to send order confirmation email:', emailError)
+      // Don't fail order creation if email fails
+    }
+    
     return {
       success: true,
       message: 'Order placed successfully',
@@ -257,6 +275,9 @@ export const createOrderFromCart = async (
   userId: string
 ) => {
   const { availableDeliveryDates } = await getSetting()
+  console.log('Available delivery dates from database:', availableDeliveryDates)
+  console.log('Client side delivery date index:', clientSideCart.deliveryDateIndex)
+  
   const cart = {
     ...clientSideCart,
     ...calcDeliveryDateAndPrice({
@@ -265,6 +286,16 @@ export const createOrderFromCart = async (
       deliveryDateIndex: clientSideCart.deliveryDateIndex,
       availableDeliveryDates,
     }),
+  }
+  
+  console.log('Calculated expected delivery date:', cart.expectedDeliveryDate)
+  console.log('Current time:', new Date())
+  if (cart.expectedDeliveryDate) {
+    const timeDiffMinutes = (cart.expectedDeliveryDate.getTime() - new Date().getTime()) / (1000 * 60)
+    console.log('Time difference (minutes):', timeDiffMinutes)
+    console.log('Is delivery date in the future?', timeDiffMinutes > 5)
+    console.log('Delivery date ISO string:', cart.expectedDeliveryDate.toISOString())
+    console.log('Current time ISO string:', new Date().toISOString())
   }
 
   const order = OrderInputSchema.parse({
@@ -391,11 +422,12 @@ export async function updateOrderToPaid(orderId: string) {
       throw new Error('Failed to load order details')
     }
     
-    // Send receipt email
+    // Send payment confirmation email
     try {
-      await sendPurchaseReceipt({ order: populatedOrder })
+      const { emailService } = await import('../email-service')
+      await emailService.sendPaymentConfirmationEmail(populatedOrder)
     } catch (emailError) {
-      console.error('Failed to send purchase receipt:', emailError)
+      console.error('Failed to send payment confirmation email:', emailError)
       // Don't fail the whole operation if email fails
     }
     
@@ -453,7 +485,19 @@ export async function deliverOrder(orderId: string) {
     order.isDelivered = true
     order.deliveredAt = new Date()
     await order.save()
+    
+    // Send delivery confirmation email
+    try {
+      const { emailService } = await import('../email-service')
+      await emailService.sendDeliveryConfirmationEmail(order)
+    } catch (emailError) {
+      console.error('Failed to send delivery confirmation email:', emailError)
+      // Don't fail the whole operation if email fails
+    }
+    
+    // Send review request email
     if (order.user.email) await sendAskReviewOrderItems({ order })
+    
     revalidatePath(`/account/orders/${orderId}`)
     return { success: true, message: 'Order delivered successfully' }
   } catch (err) {

@@ -21,11 +21,34 @@ export async function registerUser(userSignUp: IUserSignUp) {
     })
 
     await connectToDatabase()
+    
+    // Generate verification token
+    const verificationToken = crypto.randomUUID()
+    const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+    
     await User.create({
       ...user,
       password: await bcrypt.hash(user.password, 5),
+      verificationToken,
+      verificationTokenExpires,
+      emailVerified: false,
     })
-    return { success: true, message: 'User created successfully' }
+    
+    // Send verification email
+    try {
+      const { emailService } = await import('../email-service')
+      await emailService.sendVerificationEmail(
+        user.email,
+        user.name,
+        verificationToken
+      )
+      console.log(`Verification email sent to ${user.email}`)
+    } catch (emailError) {
+      console.error('Failed to send verification email:', emailError)
+      // Don't fail registration if email fails
+    }
+    
+    return { success: true, message: 'User created successfully. Please check your email to verify your account.' }
   } catch (error) {
     return { success: false, error: formatError(error) }
   }
@@ -190,4 +213,96 @@ export async function getUserById(userId: string) {
   const user = await User.findById(userId)
   if (!user) throw new Error('User not found')
   return JSON.parse(JSON.stringify(user)) as IUser
+}
+
+// Email verification
+export async function verifyEmail(token: string) {
+  try {
+    console.log('🔍 Starting email verification for token:', token.substring(0, 8) + '...')
+    await connectToDatabase()
+    
+    const user = await User.findOne({
+      verificationToken: token,
+      verificationTokenExpires: { $gt: new Date() }
+    })
+    
+    console.log('👤 User found:', user ? `ID: ${user._id}, Email: ${user.email}` : 'No user found')
+    
+    if (!user) {
+      console.log('❌ No user found with valid token')
+      return { success: false, message: 'Invalid or expired verification token' }
+    }
+    
+    console.log('✅ User found, marking email as verified')
+    
+    // Mark email as verified
+    user.emailVerified = true
+    
+    // Add a small delay to prevent race conditions
+    await new Promise(resolve => setTimeout(resolve, 500))
+    
+    // Clear verification token after delay
+    user.verificationToken = undefined
+    user.verificationTokenExpires = undefined
+    
+    await user.save()
+    console.log('✅ Email verification completed successfully')
+    
+    return { success: true, message: 'Email verified successfully' }
+  } catch (error) {
+    console.error('💥 Error in verifyEmail:', error)
+    return { success: false, message: formatError(error) }
+  }
+}
+
+// Resend verification email
+export async function resendVerificationEmail(userEmail: string) {
+  try {
+    console.log('🔍 Starting resend verification for email:', userEmail)
+    await connectToDatabase()
+    
+    const user = await User.findOne({ email: userEmail })
+    console.log('👤 User found for resend:', user ? `ID: ${user._id}, Verified: ${user.emailVerified}` : 'No user found')
+    
+    if (!user) {
+      console.log('❌ No user found for email:', userEmail)
+      return { success: false, message: 'User not found' }
+    }
+    
+    if (user.emailVerified) {
+      console.log('✅ User already verified:', userEmail)
+      return { success: false, message: 'Email is already verified' }
+    }
+    
+    console.log('🔄 Generating new verification token for:', userEmail)
+    
+    // Generate new verification token
+    const verificationToken = crypto.randomUUID()
+    const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+    
+    user.verificationToken = verificationToken
+    user.verificationTokenExpires = verificationTokenExpires
+    
+    await user.save()
+    console.log('✅ New verification token saved for:', userEmail)
+    
+    // Send verification email
+    try {
+      const { emailService } = await import('../email-service')
+      await emailService.sendVerificationEmail(
+        user.email,
+        user.name,
+        verificationToken
+      )
+      
+      console.log('✅ New verification email sent to:', userEmail)
+      return { success: true, message: 'Verification email sent successfully' }
+    } catch (emailError) {
+      console.error('💥 Failed to send verification email:', emailError)
+      return { success: false, message: 'Failed to send verification email' }
+    }
+  } catch (error) {
+    console.error('💥 Error in resendVerificationEmail:', error)
+    return { success: false, message: formatError(error) }
+  }
 }

@@ -121,7 +121,7 @@ export default function ConditionsOfUsePage() {
           <h2 className="text-2xl font-semibold mb-3">10. Contact Us</h2>
           <p className="text-gray-700">
             If you have any questions about these Terms, please contact us at:
-            <a href="mailto:legal@aldorahouse.com" className="text-blue-600 hover:underline ml-1">legal@aldorahouse.com</a>
+            <a href="mailto:n8v.store@gmail.com" className="text-blue-600 hover:underline ml-1">n8v.store@gmail.com</a>
           </p>
         </section>
       </div>

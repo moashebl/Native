@@ -56,6 +56,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const user = await User.findOne({ email: credentials.email })
 
         if (user && user.password) {
+          // Check if email is verified for non-Google users
+          if (!user.emailVerified) {
+            throw new Error('Please verify your email address before signing in. Check your inbox for a verification link.')
+          }
+          
           const isMatch = await bcrypt.compare(
             credentials.password as string,
             user.password

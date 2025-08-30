@@ -1,18 +1,17 @@
 import React from 'react'
 import { IOrder } from '@/lib/db/models/order.model'
-import { SERVER_URL } from '@/lib/constants'
 
-interface AskReviewOrderItemsEmailProps {
+interface OrderConfirmationEmailProps {
   order: IOrder
   siteName: string
   egpRate?: number
 }
 
-export default function AskReviewOrderItemsEmail({
+export default function OrderConfirmationEmail({
   order,
   siteName,
   egpRate = 48.0, // Default fallback rate
-}: AskReviewOrderItemsEmailProps) {
+}: OrderConfirmationEmailProps) {
   const formatPrice = (price: number) => {
     // Convert USD to EGP using current API rate
     const egpPrice = price * egpRate
@@ -30,7 +29,7 @@ export default function AskReviewOrderItemsEmail({
     })
   }
 
-    return (
+  return (
     <div style={{ 
       fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif', 
       maxWidth: '600px', 
@@ -42,11 +41,24 @@ export default function AskReviewOrderItemsEmail({
     }}>
       {/* Header */}
       <div style={{ 
-        backgroundColor: '#f59e0b', 
+        backgroundColor: '#059669', 
         padding: '30px 20px', 
         textAlign: 'center',
-        borderBottom: '3px solid #fbbf24'
+        borderBottom: '3px solid #10b981'
       }}>
+        {/* Logo */}
+        <div style={{ marginBottom: '20px' }}>
+          <img 
+            src="https://native-house.com/icons/logo.svg" 
+            alt="Native House Logo"
+            style={{ 
+              width: '80px', 
+              height: '80px',
+              margin: '0 auto 15px auto',
+              display: 'block'
+            }}
+          />
+        </div>
         <h1 style={{ 
           color: '#ffffff', 
           margin: '0',
@@ -57,7 +69,7 @@ export default function AskReviewOrderItemsEmail({
           {siteName}
         </h1>
         <p style={{ 
-          color: '#fef3c7', 
+          color: '#d1fae5', 
           margin: '8px 0 0 0',
           fontSize: '14px',
           fontWeight: '400'
@@ -70,7 +82,7 @@ export default function AskReviewOrderItemsEmail({
       <div style={{ padding: '40px 30px' }}>
         <div style={{ textAlign: 'center', marginBottom: '30px' }}>
           <div style={{
-            backgroundColor: '#f59e0b',
+            backgroundColor: '#059669',
             color: 'white',
             width: '80px',
             height: '80px',
@@ -81,7 +93,7 @@ export default function AskReviewOrderItemsEmail({
             margin: '0 auto 20px auto',
             fontSize: '32px'
           }}>
-            ⭐
+            ✅
           </div>
           <h2 style={{ 
             color: '#1f2937', 
@@ -89,7 +101,7 @@ export default function AskReviewOrderItemsEmail({
             fontSize: '24px',
             fontWeight: '600'
           }}>
-            How Was Your Experience?
+            Order Confirmation
           </h2>
           <p style={{ 
             color: '#6b7280', 
@@ -97,7 +109,7 @@ export default function AskReviewOrderItemsEmail({
             fontSize: '16px',
             lineHeight: '1.5'
           }}>
-            We&apos;d love to hear about your recent order
+            Thank you for your order! We&apos;ve received it and are processing it now.
           </p>
         </div>
         
@@ -137,10 +149,10 @@ export default function AskReviewOrderItemsEmail({
             </div>
             <div>
               <p style={{ margin: '5px 0', color: '#6b7280', fontSize: '14px' }}>
-                <strong>Delivery Date:</strong>
+                <strong>Expected Delivery:</strong>
               </p>
               <p style={{ margin: '5px 0', color: '#374151', fontSize: '16px', fontWeight: '500' }}>
-                {order.deliveredAt ? formatDate(order.deliveredAt) : 'N/A'}
+                {formatDate(order.expectedDeliveryDate)}
               </p>
             </div>
             <div>
@@ -161,7 +173,7 @@ export default function AskReviewOrderItemsEmail({
           fontSize: '18px',
           fontWeight: '600'
         }}>
-          🛍️ Items to Review
+          🛍️ Order Items
         </h3>
         {order.items.map((item, index) => (
           <div key={index} style={{ 
@@ -176,7 +188,7 @@ export default function AskReviewOrderItemsEmail({
             <div style={{ marginRight: '20px' }}>
               <img 
                 src={item.image} 
-                          alt={item.name}
+                alt={item.name}
                 style={{ 
                   width: '100px', 
                   height: '100px', 
@@ -215,7 +227,7 @@ export default function AskReviewOrderItemsEmail({
               </div>
               <p style={{ 
                 margin: '0', 
-                color: '#f59e0b', 
+                color: '#059669', 
                 fontSize: '18px',
                 fontWeight: '600'
               }}>
@@ -265,96 +277,69 @@ export default function AskReviewOrderItemsEmail({
             fontWeight: 'bold' 
           }}>
             <span style={{ color: '#1f2937', fontSize: '18px', fontWeight: '600' }}>Total:</span>
-            <span style={{ color: '#f59e0b', fontSize: '20px', fontWeight: '700' }}>{formatPrice(order.totalPrice)}</span>
+            <span style={{ color: '#059669', fontSize: '20px', fontWeight: '700' }}>{formatPrice(order.totalPrice)}</span>
           </div>
         </div>
         
-        {/* Review Request */}
+        {/* Shipping Address */}
         <div style={{ 
-          backgroundColor: '#fef3c7', 
+          backgroundColor: '#f8fafc', 
           padding: '25px', 
           borderRadius: '8px',
           marginBottom: '30px',
-          border: '1px solid #fde68a'
+          border: '1px solid #e2e8f0'
         }}>
           <h3 style={{ 
-            color: '#92400e', 
+            color: '#1f2937', 
+            marginTop: '0', 
+            marginBottom: '20px',
+            fontSize: '18px',
+            fontWeight: '600'
+          }}>
+            📍 Shipping Address
+          </h3>
+          <p style={{ margin: '5px 0', color: '#374151', fontSize: '16px' }}>
+            <strong>{order.shippingAddress.fullName}</strong>
+          </p>
+          <p style={{ margin: '5px 0', color: '#374151', fontSize: '16px' }}>
+            {order.shippingAddress.street}
+          </p>
+          <p style={{ margin: '5px 0', color: '#374151', fontSize: '16px' }}>
+            {order.shippingAddress.city}, {order.shippingAddress.province} {order.shippingAddress.postalCode}
+          </p>
+          <p style={{ margin: '5px 0', color: '#374151', fontSize: '16px' }}>
+            {order.shippingAddress.country}
+          </p>
+          <p style={{ margin: '5px 0', color: '#374151', fontSize: '16px' }}>
+            <strong>Phone:</strong> {order.shippingAddress.phone}
+          </p>
+        </div>
+        
+        <div style={{ 
+          backgroundColor: '#eff6ff', 
+          padding: '25px', 
+          borderRadius: '8px',
+          marginBottom: '30px',
+          border: '1px solid #dbeafe'
+        }}>
+          <h3 style={{ 
+            color: '#1e40af', 
             marginTop: '0', 
             marginBottom: '15px',
             fontSize: '18px',
             fontWeight: '600'
           }}>
-            💬 Share Your Experience
+            📧 What&apos;s Next?
           </h3>
           <p style={{ 
-            color: '#92400e', 
-            lineHeight: '1.6', 
-            marginBottom: '20px',
-            fontSize: '16px'
-          }}>
-            Your feedback helps us improve and helps other customers make informed decisions. We&apos;d love to hear about your experience with these items!
-          </p>
-          <div style={{ textAlign: 'center' }}>
-            <a
-              href={`${SERVER_URL}/account/orders/${order._id}`}
-              style={{
-                backgroundColor: '#f59e0b',
-                color: 'white',
-                padding: '12px 30px',
-                textDecoration: 'none',
-                borderRadius: '8px',
-                display: 'inline-block',
-                fontWeight: '600',
-                fontSize: '16px',
-                boxShadow: '0 4px 6px rgba(245, 158, 11, 0.25)',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              Review Your Order
-            </a>
-          </div>
-        </div>
-        
-        {/* Benefits of Reviewing */}
-        <div style={{ 
-          backgroundColor: '#ecfdf5', 
-          padding: '25px', 
-          borderRadius: '8px',
-          marginBottom: '30px',
-          border: '1px solid #a7f3d0'
-        }}>
-          <h3 style={{ 
-            color: '#065f46', 
-            marginTop: '0', 
-            marginBottom: '15px',
-            fontSize: '18px',
-            fontWeight: '600'
-          }}>
-            🌟 Why Your Review Matters
-          </h3>
-          <ul style={{ 
-            color: '#065f46', 
+            color: '#1e40af', 
             lineHeight: '1.6', 
             margin: '0',
-            fontSize: '16px',
-            paddingLeft: '20px'
+            fontSize: '16px'
           }}>
-            <li>Help other customers make informed decisions</li>
-            <li>Improve our product quality and service</li>
-            <li>Share your experience with the community</li>
-            <li>Your feedback directly impacts future improvements</li>
-          </ul>
+            We&apos;ll send you updates about your order status via email. If you have any questions, please don&apos;t hesitate to contact our customer service team.
+          </p>
         </div>
-        
-        <p style={{ 
-          color: '#374151', 
-          lineHeight: '1.6', 
-          marginBottom: '20px',
-          fontSize: '16px',
-          textAlign: 'center'
-        }}>
-          Thank you for choosing {siteName}! We value your feedback.
-        </p>
         
         <p style={{ 
           color: '#374151', 
@@ -420,5 +405,5 @@ export default function AskReviewOrderItemsEmail({
         </div>
       </div>
     </div>
-    )
-  }
+  )
+}

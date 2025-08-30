@@ -21,7 +21,7 @@ import { toast } from '@/hooks/use-toast'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { UserSignUpSchema } from '@/lib/validator'
 import { Separator } from '@/components/ui/separator'
-import { signIn } from 'next-auth/react'
+// import { signIn } from 'next-auth/react'
 
 const signUpDefaultValues =
   process.env.NODE_ENV === 'development'
@@ -67,31 +67,14 @@ export default function CredentialsSignInForm() {
         return
       }
       
-      // Auto sign-in after successful registration
-      const signInResult = await signIn('credentials', {
-        email: data.email,
-        password: data.password,
-        redirect: false,
+      // Show success message about email verification
+      toast({
+        title: 'Account Created Successfully!',
+        description: res.message,
       })
-
-      if (signInResult?.error) {
-        toast({
-          title: 'Account Created',
-          description: 'Account created successfully. Please sign in.',
-        })
-        router.push('/sign-in')
-      } else if (signInResult?.ok) {
-        toast({
-          title: 'Success',
-          description: 'Account created and signed in successfully',
-        })
-        
-        // Small delay to ensure session is established
-        setTimeout(() => {
-          router.push(callbackUrl)
-          router.refresh()
-        }, 500)
-      }
+      
+      // Redirect to sign-in page since email needs to be verified
+      router.push('/sign-in')
     } catch {
       toast({
         title: 'Error',

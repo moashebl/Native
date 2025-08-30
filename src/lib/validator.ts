@@ -122,8 +122,14 @@ export const OrderInputSchema = z.object({
   expectedDeliveryDate: z
     .date()
     .refine(
-      (value) => value > new Date(),
-      'Expected delivery date must be in the future'
+      (value) => {
+        const now = new Date()
+        // Allow delivery dates that are at least 5 minutes in the future to account for timezone issues and processing delays
+        // This allows for same-day delivery (0 days) to work properly
+        const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000)
+        return value > fiveMinutesFromNow
+      },
+      'Expected delivery date must be at least 5 minutes in the future'
     ),
   isDelivered: z.boolean().default(false),
   deliveredAt: z.date().optional(),
@@ -161,10 +167,12 @@ export const UserInputSchema = z.object({
   name: UserName,
   email: Email,
   image: z.string().optional(),
-  emailVerified: z.boolean(),
+  emailVerified: z.boolean().default(false),
   role: UserRole,
-  password: Password,
-  paymentMethod: z.string().min(1, 'Payment method is required'),
+  password: Password.optional(),
+  verificationToken: z.string().optional(),
+  verificationTokenExpires: z.date().optional(),
+  paymentMethod: z.string().min(1, 'Payment method is required').optional(),
   address: z.object({
     fullName: z.string().min(1, 'Full name is required'),
     street: z.string().min(1, 'Street is required'),
@@ -173,7 +181,7 @@ export const UserInputSchema = z.object({
     postalCode: z.string().min(1, 'Postal code is required'),
     country: z.string().min(1, 'Country is required'),
     phone: z.string().min(1, 'Phone number is required'),
-  }),
+  }).optional(),
 })
 
 export const UserSignInSchema = z.object({
@@ -250,7 +258,7 @@ export const PaymentMethodSchema = z.object({
 
 export const DeliveryDateSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  daysToDeliver: z.number().min(0, 'Days to deliver must be at least 0'),
+  daysToDeliver: z.coerce.number().min(0, 'Days to deliver must be at least 0'),
   shippingPrice: z.coerce.number().min(0, 'Shipping price must be at least 0'),
   freeShippingMinPrice: z.coerce
     .number()

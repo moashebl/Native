@@ -136,9 +136,6 @@ const CheckoutForm = () => {
     const res = await createOrder({
       items,
       shippingAddress,
-      expectedDeliveryDate: calculateFutureDate(
-        AVAILABLE_DELIVERY_DATES[deliveryDateIndex].daysToDeliver
-      ),
       deliveryDateIndex,
       paymentMethod,
       itemsPrice,

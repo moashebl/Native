@@ -107,7 +107,7 @@ const data = {
         description: "Your trusted online shopping destination",
         keywords: "online shopping, quality products, great prices, trusted retailer",
         url: "https://native-house.com",
-        email: "support@native-house.com",
+        email: "n8v.store@gmail.com",
         phone: "+1-555-0123",
         author: "Native House Team",
         copyright: "© 2024 Native House. All rights reserved.",
