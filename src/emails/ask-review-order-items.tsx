@@ -1,9 +1,9 @@
 import React from 'react'
-import { IOrder } from '@/lib/db/models/order.model'
+  import { IOrder } from '@/lib/db/models/order.model'
 import { SERVER_URL } from '@/lib/constants'
-
+  
 interface AskReviewOrderItemsEmailProps {
-  order: IOrder
+    order: IOrder
   siteName: string
   egpRate?: number
 }

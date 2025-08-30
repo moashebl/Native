@@ -1,8 +1,8 @@
 import React from 'react'
-import { IOrder } from '@/lib/db/models/order.model'
-
+  import { IOrder } from '@/lib/db/models/order.model'
+  
 interface PurchaseReceiptEmailProps {
-  order: IOrder
+    order: IOrder
   siteName: string
   egpRate?: number
 }
