@@ -1,13 +1,8 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  // Disable experimental features that can cause issues
-  experimental: {
-    // Disable server actions if not needed
-    serverActions: {
-      allowedOrigins: [],
-    },
-  },
+  // Minimal config for Vercel compatibility
+  experimental: {},
   // Disable build traces that cause Vercel issues
   generateBuildId: () => 'build',
   
