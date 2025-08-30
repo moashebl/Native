@@ -1,8 +1,152 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { type ClassValue, clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
 import qs from 'query-string'
-import { OrderItem, ShippingAddress } from '@/types'
-import { AVAILABLE_DELIVERY_DATES } from './constants'
+import { OrderItem, ShippingAddress, DeliveryDate } from '@/types'
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
+export function round2(num: number) {
+  return Math.round((num + Number.EPSILON) * 100) / 100
+}
+
+export function formatDate(dateString: Date | string) {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+}
+
+export function formatDateTime(dateString: Date) {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffInMs = now.getTime() - date.getTime()
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
+
+  const dateOnly = date.toLocaleDateString('en-US', {
+    month: 'short',
+    year: 'numeric',
+    day: 'numeric',
+  })
+
+  const timeOnly = date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: true,
+  })
+
+  if (diffInDays === 0) {
+    return {
+      dateTime: 'Today',
+      relative: 'Today',
+      dateOnly,
+      timeOnly,
+    }
+  } else if (diffInDays === 1) {
+    return {
+      dateTime: 'Yesterday',
+      relative: 'Yesterday',
+      dateOnly,
+      timeOnly,
+    }
+  } else if (diffInDays < 7) {
+    return {
+      dateTime: `${diffInDays} days ago`,
+      relative: `${diffInDays} days ago`,
+      dateOnly,
+      timeOnly,
+    }
+  } else if (diffInDays < 30) {
+    const weeks = Math.floor(diffInDays / 7)
+    return {
+      dateTime: `${weeks} week${weeks > 1 ? 's' : ''} ago`,
+      relative: `${weeks} week${weeks > 1 ? 's' : ''} ago`,
+      dateOnly,
+      timeOnly,
+    }
+  } else if (diffInDays < 365) {
+    const months = Math.floor(diffInDays / 30)
+    return {
+      dateTime: `${months} month${months > 1 ? 's' : ''} ago`,
+      relative: `${months} month${months > 1 ? 's' : ''} ago`,
+      dateOnly,
+      timeOnly,
+    }
+  } else {
+    const years = Math.floor(diffInDays / 365)
+    return {
+      dateTime: `${years} year${years > 1 ? 's' : ''} ago`,
+      relative: `${years} year${years > 1 ? 's' : ''} ago`,
+      dateOnly,
+      timeOnly,
+    }
+  }
+}
+
+export function formatFullDateTime(dateString: Date) {
+  const date = new Date(dateString)
+  
+  const fullDate = date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+  
+  const fullTime = date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+    hour12: true,
+  })
+  
+  return {
+    fullDateTime: `${fullDate} at ${fullTime}`,
+    fullDate,
+    fullTime,
+    dateOnly: date.toLocaleDateString('en-US', {
+      month: 'short',
+      year: 'numeric',
+      day: 'numeric',
+    }),
+    timeOnly: date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true,
+    }),
+  }
+}
+
+export function getMonthName(monthNumber: string) {
+  const months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ]
+  return months[parseInt(monthNumber) - 1] || monthNumber
+}
+
+export function formatId(id: string) {
+  return id.slice(-6).toUpperCase()
+}
+
+export function toSlug(text: string) {
+  return text
+    .toLowerCase()
+    .replace(/[^\w ]+/g, '')
+    .replace(/ +/g, '-')
+}
 
 export function formUrlQuery({
   params,
@@ -14,9 +158,7 @@ export function formUrlQuery({
   value: string | null
 }) {
   const currentUrl = qs.parse(params)
-
   currentUrl[key] = value
-
   return qs.stringifyUrl(
     {
       url: window.location.pathname,
@@ -25,47 +167,33 @@ export function formUrlQuery({
     { skipNull: true }
   )
 }
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
+
 export const formatNumberWithDecimal = (num: number): string => {
   const [int, decimal] = num.toString().split('.')
   return decimal ? `${int}.${decimal.padEnd(2, '0')}` : int
 }
-// PROMPT: [ChatGTP] create toSlug ts arrow function that convert text to lowercase, remove non-word, non-whitespace, non-hyphen characters, replace whitespace, trim leading hyphens and trim trailing hyphens
 
-export const toSlug = (text: string): string =>
-  text
-    .toLowerCase()
-    .replace(/[^\w\s-]+/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .replace(/-+/g, '-')
-    
-    const CURRENCY_FORMATTER = new Intl.NumberFormat('en-US', {
-      currency: 'USD',
-      style: 'currency',
-      minimumFractionDigits: 2,
-    })
-    export function formatCurrency(amount: number) {
-      return CURRENCY_FORMATTER.format(amount)
-    }
-    
-    const NUMBER_FORMATTER = new Intl.NumberFormat('en-US')
-    export function formatNumber(number: number) {
-      return NUMBER_FORMATTER.format(number)
-    }
-    export const round2 = (num: number) =>
-      Math.round((num + Number.EPSILON) * 100) / 100
-    
-    export const generateId = () =>
-      Array.from({ length: 24 }, () => Math.floor(Math.random() * 10)).join('')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const formatNumber = (number: number) => {
+  return new Intl.NumberFormat('en-US').format(number)
+}
+
+export const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('en-US', {
+    currency: 'USD',
+    style: 'currency',
+    minimumFractionDigits: 2,
+  }).format(amount)
+}
+
+export const generateId = () =>
+  Array.from({ length: 24 }, () => Math.floor(Math.random() * 10)).join('')
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const formatError = (error: any): string => {
   if (error.name === 'ZodError') {
     const fieldErrors = error.issues.map((issue: { path: string[]; message: string }) => {
       const fieldPath = issue.path.join('.')
-      return `${fieldPath}: ${issue.message}` // field: errorMessage
+      return `${fieldPath}: ${issue.message}`
     })
     return fieldErrors.join('. ')
   } else if (error.name === 'ValidationError') {
@@ -78,102 +206,55 @@ export const formatError = (error: any): string => {
     const duplicateField = Object.keys(error.keyValue)[0]
     return `${duplicateField} already exists`
   } else {
-    // return 'Something went wrong. please try again'
     return typeof error.message === 'string'
       ? error.message
       : JSON.stringify(error.message)
   }
 }
+
 export function calculateFutureDate(days: number) {
   const currentDate = new Date()
   currentDate.setDate(currentDate.getDate() + days)
   return currentDate
 }
-export function getMonthName(yearAndMonth: string) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [year, monthNumber] = yearAndMonth.split('-')
-  const date = new Date()
-  date.setMonth(parseInt(monthNumber) - 1)
-  return new Date().getMonth() === parseInt(monthNumber) - 1
-    ? `${date.toLocaleString('default', { month: 'long' })} (ongoing)`
-    : date.toLocaleString('default', { month: 'long' })
-}
+
 export function calculatePastDate(days: number) {
   const currentDate = new Date()
   currentDate.setDate(currentDate.getDate() - days)
   return currentDate
 }
+
 export function timeUntilMidnight(): { hours: number; minutes: number } {
   const now = new Date()
   const midnight = new Date()
-  midnight.setHours(24, 0, 0, 0) // Set to 12:00 AM (next day)
+  midnight.setHours(24, 0, 0, 0)
 
-  const diff = midnight.getTime() - now.getTime() // Difference in milliseconds
+  const diff = midnight.getTime() - now.getTime()
   const hours = Math.floor(diff / (1000 * 60 * 60))
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
 
   return { hours, minutes }
 }
 
-export const formatDateTime = (dateString: Date) => {
-  const dateTimeOptions: Intl.DateTimeFormatOptions = {
-    month: 'short', // abbreviated month name (e.g., 'Oct')
-    year: 'numeric', // abbreviated month name (e.g., 'Oct')
-    day: 'numeric', // numeric day of the month (e.g., '25')
-    hour: 'numeric', // numeric hour (e.g., '8')
-    minute: 'numeric', // numeric minute (e.g., '30')
-    hour12: true, // use 12-hour clock (true) or 24-hour clock (false)
-  }
-  const dateOptions: Intl.DateTimeFormatOptions = {
-    // weekday: 'short', // abbreviated weekday name (e.g., 'Mon')
-    month: 'short', // abbreviated month name (e.g., 'Oct')
-    year: 'numeric', // numeric year (e.g., '2023')
-    day: 'numeric', // numeric day of the month (e.g., '25')
-  }
-  const timeOptions: Intl.DateTimeFormatOptions = {
-    hour: 'numeric', // numeric hour (e.g., '8')
-    minute: 'numeric', // numeric minute (e.g., '30')
-    hour12: true, // use 12-hour clock (true) or 24-hour clock (false)
-  }
-  const formattedDateTime: string = new Date(dateString).toLocaleString(
-    'en-US',
-    dateTimeOptions
-  )
-  const formattedDate: string = new Date(dateString).toLocaleString(
-    'en-US',
-    dateOptions
-  )
-  const formattedTime: string = new Date(dateString).toLocaleString(
-    'en-US',
-    timeOptions
-  )
-  return {
-    dateTime: formattedDateTime,
-    dateOnly: formattedDate,
-    timeOnly: formattedTime,
-  }
-}
-export function formatId(id: string) {
-  return `..${id.substring(id.length - 6)}`
-}
-
 export const calcDeliveryDateAndPrice = ({
   items,
   shippingAddress,
   deliveryDateIndex,
+  availableDeliveryDates,
 }: {
   deliveryDateIndex?: number
   items: OrderItem[]
   shippingAddress?: ShippingAddress
+  availableDeliveryDates: DeliveryDate[]
 }) => {
   const itemsPrice = round2(
     items.reduce((acc, item) => acc + item.price * item.quantity, 0)
   )
 
   const deliveryDate =
-    AVAILABLE_DELIVERY_DATES[
+    availableDeliveryDates[
       deliveryDateIndex === undefined
-        ? AVAILABLE_DELIVERY_DATES.length - 1
+        ? availableDeliveryDates.length - 1
         : deliveryDateIndex
     ]
 
@@ -192,11 +273,12 @@ export const calcDeliveryDateAndPrice = ({
       (shippingPrice ? round2(shippingPrice) : 0) +
       (taxPrice ? round2(taxPrice) : 0)
   )
+  
   return {
-    AVAILABLE_DELIVERY_DATES,
+    availableDeliveryDates,
     deliveryDateIndex:
       deliveryDateIndex === undefined
-        ? AVAILABLE_DELIVERY_DATES.length - 1
+        ? availableDeliveryDates.length - 1
         : deliveryDateIndex,
     itemsPrice,
     shippingPrice,
@@ -205,6 +287,7 @@ export const calcDeliveryDateAndPrice = ({
     expectedDeliveryDate: deliveryDate ? calculateFutureDate(deliveryDate.daysToDeliver) : undefined,
   }
 }
+
 export const getFilterUrl = ({
   params,
   category,

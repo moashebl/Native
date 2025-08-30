@@ -48,11 +48,11 @@
 }
 :root {
   --radius: 0.65rem;
-  --background: oklch(1 0 0);
+  --background: oklch(0.95 0.01 286.375);
   --foreground: oklch(0.141 0.005 285.823);
-  --card: oklch(1 0 0);
+  --card: oklch(0.95 0.01 286.375);
   --card-foreground: oklch(0.141 0.005 285.823);
-  --popover: oklch(1 0 0);
+  --popover: oklch(0.95 0.01 286.375);
   --popover-foreground: oklch(0.141 0.005 285.823);
   --primary: oklch(0.795 0.184 86.047);
   --primary-foreground: oklch(0.421 0.095 57.708);
@@ -146,7 +146,7 @@
     @apply text-sky-700  hover:text-orange-700 hover:underline;
   }
   .header-button {
-    @apply cursor-pointer p-1 border border-transparent hover:border-white rounded-[2px];
+    @apply cursor-pointer p-1 border border-transparent hover:border-foreground rounded-[2px];
   }
   .item-button {
     @apply p-3 hover:bg-muted hover:no-underline;

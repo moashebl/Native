@@ -18,23 +18,13 @@ export const FREE_SHIPPING_MIN_PRICE = Number(
   
   export const AVAILABLE_PAYMENT_METHODS = [
     {
-      name: 'PayPal',
-      commission: 0,
-      isDefault: true,
-    },
-    {
-      name: 'Stripe',
-      commission: 0,
-      isDefault: true,
-    },
-    {
       name: 'Cash On Delivery',
       commission: 0,
       isDefault: true,
     },
   ]
   export const DEFAULT_PAYMENT_METHOD =
-    process.env.DEFAULT_PAYMENT_METHOD || 'PayPal'
+    process.env.DEFAULT_PAYMENT_METHOD || 'Cash On Delivery'
   
   export const AVAILABLE_DELIVERY_DATES = [
     {
@@ -57,3 +47,6 @@ export const FREE_SHIPPING_MIN_PRICE = Number(
     },
   ]
   export const USER_ROLES = ['Admin', 'User']
+
+export const COLORS = ['Gold', 'Violet', 'Red']
+export const THEMES = ['Light', 'Dark', 'System']

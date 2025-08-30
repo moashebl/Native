@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import ProductPrice from '@/components/shared/product/product-price'
@@ -23,17 +24,6 @@ interface CustomTooltipProps extends TooltipProps<number, string> {
   label?: string
 }
 
-interface CustomXAxisTickProps {
-  x?: number
-  y?: number
-  payload?: { value: string }
-}
-
-interface SalesData {
-  date: string
-  totalSales: number
-}
-
 const CustomTooltip: React.FC<CustomTooltipProps> = ({
   active,
   payload,
@@ -54,10 +44,10 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({
   return null
 }
 
-const CustomXAxisTick: React.FC<CustomXAxisTickProps> = ({ x, y, payload }) => {
+const CustomXAxisTick: React.FC<any> = ({ x, y, payload }) => {
   return (
-    <text x={x} y={(y || 0) + 10} textAnchor='left' fill='#666' className='text-xs'>
-      {payload?.value && formatDateTime(new Date(payload.value)).dateOnly}
+    <text x={x} y={y + 10} textAnchor='left' fill='#666' className='text-xs'>
+      {formatDateTime(new Date(payload.value)).dateOnly}
       {/* {`${payload.value.split('/')[1]}/${payload.value.split('/')[2]}`} */}
     </text>
   )
@@ -68,7 +58,7 @@ const STROKE_COLORS: { [key: string]: { [key: string]: string } } = {
   Gold: { light: '#d4af37', dark: '#eab308' },
 }
 
-export default function SalesAreaChart({ data }: { data: SalesData[] }) {
+export default function SalesAreaChart({ data }: { data: any[] }) {
   const { theme } = useTheme()
   const { color } = useColorStore(theme || 'light')
 
@@ -96,7 +86,7 @@ export default function SalesAreaChart({ data }: { data: SalesData[] }) {
           stroke={strokeColor}
           strokeWidth={2}
           fill={fillColor}
-          fillOpacity={0.3}
+          fillOpacity={0.8}
         />
       </AreaChart>
     </ResponsiveContainer>

@@ -36,7 +36,7 @@ const productDefaultValues: IProductInput =
         images: ['/images/p11-1.jpg'],
         brand: 'Sample Brand',
         description: 'This is a sample description of the product.',
-        price: 99.99,
+        price: 2999.99, // EGP equivalent of ~$99.99
         listPrice: 0,
         countInStock: 15,
         numReviews: 0,
@@ -124,7 +124,7 @@ const ProductForm = ({
   }
   const images = form.watch('images')
 
-  console.log(form.formState.errors)
+  // console.log(form.formState.errors)
   return (
     <Form {...form}>
       <form
@@ -215,17 +215,20 @@ const ProductForm = ({
             name='listPrice'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>List Price</FormLabel>
+                <FormLabel>List Price (EGP)</FormLabel>
                 <FormControl>
                   <Input
                     type='number'
                     step='0.01'
-                    placeholder='Enter product list price'
+                    placeholder='Enter product list price in EGP'
                     {...field}
                     value={field.value?.toString() || ''}
                     onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                   />
                 </FormControl>
+                <FormDescription>
+                  Original price before discount (in Egyptian Pounds)
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -235,17 +238,20 @@ const ProductForm = ({
             name='price'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Net Price</FormLabel>
+                <FormLabel>Net Price (EGP)</FormLabel>
                 <FormControl>
                   <Input
                     type='number'
                     step='0.01'
-                    placeholder='Enter product price'
+                    placeholder='Enter product price in EGP'
                     {...field}
                     value={field.value?.toString() || ''}
                     onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                   />
                 </FormControl>
+                <FormDescription>
+                  Final selling price (in Egyptian Pounds)
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}

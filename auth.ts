@@ -28,10 +28,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60,
   },
-  adapter: MongoDBAdapter(client),
+  adapter: client ? MongoDBAdapter(client) : undefined,
   providers: [
     Google({
       allowDangerousEmailAccountLinking: true,
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      authorization: {
+        params: {
+          prompt: "select_account",
+          access_type: "offline",
+          response_type: "code"
+        }
+      }
     }),
     CredentialsProvider({
       credentials: {
@@ -94,6 +103,38 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.name = user.name
       }
       return session
+    },
+    signIn: async ({ user, account, profile }) => {
+      // Handle Google sign-in more gracefully
+      if (account?.provider === 'google') {
+        try {
+          await connectToDatabase()
+          // Ensure user has required fields
+          if (!user.name && user.email) {
+            user.name = user.email.split('@')[0]
+          }
+          return true
+        } catch (error) {
+          console.error('Error during Google sign-in:', error)
+          return true // Still allow sign-in even if database update fails
+        }
+      }
+      return true
+    },
+  },
+  events: {
+    signIn: async ({ user, account, isNewUser }) => {
+      if (account?.provider === 'google' && isNewUser) {
+        try {
+          await connectToDatabase()
+          // Update user with default role if needed
+          await User.findByIdAndUpdate(user.id, {
+            role: 'user',
+          }, { upsert: true })
+        } catch (error) {
+          console.error('Error updating new Google user:', error)
+        }
+      }
     },
   },
 })

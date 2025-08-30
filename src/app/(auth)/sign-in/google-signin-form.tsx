@@ -1,8 +1,10 @@
 'use client'
-import { useFormStatus } from 'react-dom'
+import { useState, useEffect } from 'react'
+import { signIn, useSession } from 'next-auth/react'
+import { useSearchParams, useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
-import { SignInWithGoogle } from '@/lib/actions/user.actions'
+import { toast } from '@/hooks/use-toast'
 
 const GoogleIcon = () => (
   <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -26,20 +28,79 @@ const GoogleIcon = () => (
 )
 
 export function GoogleSignInForm() {
-  const SignInButton = () => {
-    const { pending } = useFormStatus()
-    return (
-      <Button disabled={pending} className='w-full' variant='outline'>
-        <div className="flex items-center justify-center gap-2">
-          <GoogleIcon />
-          {pending ? 'Redirecting to Google...' : 'Sign In with Google'}
-        </div>
-      </Button>
-    )
+  const [isLoading, setIsLoading] = useState(false)
+  const [isRedirecting, setIsRedirecting] = useState(false)
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const { data: session, status } = useSession()
+  const callbackUrl = searchParams.get('callbackUrl') || '/'
+
+  // Handle successful authentication redirect
+  useEffect(() => {
+    if (session && status === 'authenticated' && isRedirecting) {
+      setIsRedirecting(false)
+      setIsLoading(false)
+      router.push(callbackUrl)
+      router.refresh()
+    }
+  }, [session, status, isRedirecting, callbackUrl, router])
+
+  const handleGoogleSignIn = async () => {
+    if (isLoading) return
+    
+    setIsLoading(true)
+    
+    try {
+      // First attempt: Use NextAuth's built-in OAuth redirect
+      const result = await signIn('google', {
+        callbackUrl,
+        redirect: false,
+      })
+
+      if (result?.error) {
+        // If NextAuth fails, try direct OAuth URL as fallback
+        console.log('NextAuth signIn failed, trying direct OAuth URL...')
+        window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
+      } else if (result?.ok) {
+        // If NextAuth succeeds, let it handle the redirect
+        window.location.href = result.url || `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
+      } else {
+        // Fallback to direct OAuth URL
+        window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
+      }
+    } catch (error) {
+      console.error('Google sign-in error:', error)
+      
+      // Fallback to direct OAuth URL on error
+      toast({
+        title: 'Connecting to Google',
+        description: 'Redirecting to Google sign-in...',
+      })
+      
+      setTimeout(() => {
+        window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
+      }, 100)
+    }
   }
+
+  // Don't show the button if user is already authenticated
+  if (status === 'authenticated') {
+    return null
+  }
+
   return (
-    <form action={SignInWithGoogle}>
-      <SignInButton />
-    </form>
+    <Button 
+      onClick={handleGoogleSignIn}
+      disabled={isLoading || isRedirecting || status === 'loading'} 
+      className="w-full" 
+      variant="outline"
+    >
+      <div className="flex items-center justify-center gap-2">
+        <GoogleIcon />
+        {isLoading ? 'Connecting to Google...' : 
+         isRedirecting ? 'Redirecting to Google...' : 
+         'Sign In with Google'}
+      </div>
+    </Button>
   )
 }

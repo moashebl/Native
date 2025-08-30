@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   description: 'Find answers to common questions and get support.',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default function HelpPage() {
   return (
     <div className="container mx-auto py-8 px-4">

@@ -1,27 +1,15 @@
 'use server'
 import bcrypt from 'bcryptjs'
-import { auth,signIn, signOut } from '@/../auth'
-import { IUserSignIn, IUserSignUp, IUserName } from '@/types'
+import { auth } from '@/../auth'
+import { IUserSignUp, IUserName, IUserEmail, IUserPassword } from '@/types'
 import { UserSignUpSchema, UserUpdateSchema } from '../validator'
 import { connectToDatabase } from '../db'
 import User, { IUser } from '../db/models/user.model'
 import { formatError } from '../utils'
-import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-import { PAGE_SIZE } from '../constants'
+import { getSetting } from './setting.actions'
 import { z } from 'zod'
 
-
-export async function signInWithCredentials(user: IUserSignIn) {
-  return await signIn('credentials', { ...user, redirect: false })
-}
-export const SignOut = async () => {
-  const redirectTo = await signOut({ redirect: false })
-  redirect(redirectTo.redirect)
-}
-export const SignInWithGoogle = async () => {
-  await signIn('google')
-}
 // CREATE
 export async function registerUser(userSignUp: IUserSignUp) {
   try {
@@ -60,6 +48,81 @@ export async function updateUserName(user: IUserName) {
     return { success: false, message: formatError(error) }
   }
 }
+
+export async function updateUserEmail(user: IUserEmail) {
+  try {
+    await connectToDatabase()
+    const session = await auth()
+    const currentUser = await User.findById(session?.user?.id)
+    if (!currentUser) throw new Error('User not found')
+    
+    // Check if user has a password (not Google sign-in)
+    if (!currentUser.password) {
+      return { success: false, message: 'Email cannot be changed for Google sign-in accounts' }
+    }
+    
+    // Check if email already exists
+    const existingUser = await User.findOne({ email: user.email })
+    if (existingUser && existingUser._id.toString() !== currentUser._id.toString()) {
+      return { success: false, message: 'Email already exists' }
+    }
+    
+    currentUser.email = user.email
+    const updatedUser = await currentUser.save()
+    return {
+      success: true,
+      message: 'Email updated successfully',
+      data: JSON.parse(JSON.stringify(updatedUser)),
+    }
+  } catch (error) {
+    return { success: false, message: formatError(error) }
+  }
+}
+
+export async function updateUserPassword(user: IUserPassword) {
+  try {
+    await connectToDatabase()
+    const session = await auth()
+    const currentUser = await User.findById(session?.user?.id)
+    if (!currentUser) throw new Error('User not found')
+    
+    // Check if user has a password (not Google sign-in)
+    if (!currentUser.password) {
+      return { success: false, message: 'Password cannot be changed for Google sign-in accounts' }
+    }
+    
+    // Verify current password
+    const isCurrentPasswordValid = await bcrypt.compare(user.currentPassword, currentUser.password)
+    if (!isCurrentPasswordValid) {
+      return { success: false, message: 'Current password is incorrect' }
+    }
+    
+    // Hash new password
+    currentUser.password = await bcrypt.hash(user.newPassword, 5)
+    const updatedUser = await currentUser.save()
+    return {
+      success: true,
+      message: 'Password updated successfully',
+      data: JSON.parse(JSON.stringify(updatedUser)),
+    }
+  } catch (error) {
+    return { success: false, message: formatError(error) }
+  }
+}
+
+export async function isGoogleUser() {
+  try {
+    await connectToDatabase()
+    const session = await auth()
+    const currentUser = await User.findById(session?.user?.id)
+    if (!currentUser) return false
+    
+    // If user has no password, they signed in with Google
+    return !currentUser.password
+  } catch {
+    return false
+  }
+}
 // DELETE
 
 export async function deleteUser(id: string) {
@@ -85,7 +148,10 @@ export async function getAllUsers({
   limit?: number
   page: number
 }) {
-  limit = limit || PAGE_SIZE
+  const {
+    common: { pageSize },
+  } = await getSetting()
+  limit = limit || pageSize
   await connectToDatabase()
 
   const skipAmount = (Number(page) - 1) * limit

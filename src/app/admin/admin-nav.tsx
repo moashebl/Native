@@ -1,5 +1,4 @@
 'use client'
-import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React from 'react'
 
@@ -27,10 +26,6 @@ const links = [
     href: '/admin/web-pages',
   },
   {
-    title: 'Carousel',
-    href: '/admin/carousels',
-  },
-  {
     title: 'Settings',
     href: '/admin/settings',
   },
@@ -49,7 +44,7 @@ export function AdminNav({
       {...props}
     >
       {links.map((item) => (
-        <Link
+        <a
           key={item.href}
           href={item.href}
           className={cn(
@@ -58,7 +53,7 @@ export function AdminNav({
           )}
         >
           {item.title}
-        </Link>
+        </a>
       ))}
     </nav>
   )

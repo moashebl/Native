@@ -40,6 +40,7 @@ const Pagination = ({ page, totalPages, urlParamName }: PaginationProps) => {
       >
         <ChevronLeft /> Previous
       </Button>
+      Page {page} of {totalPages}
       <Button
         size='lg'
         variant='outline'

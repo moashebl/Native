@@ -262,7 +262,7 @@ export default function useColorStore(theme: string = 'light') {
 
   const color = getColor()
   const cssColors: { [key: string]: string } =
-    theme === 'light' ? color.root : color.dark
+    theme === 'dark' ? color.dark : color.root
   return {
     availableColors,
     cssColors,
@@ -273,15 +273,26 @@ export default function useColorStore(theme: string = 'light') {
         isUserColor ? { userColor: name } : { defaultColor: name }
       )
     },
-    updateCssVariables: (currentTheme?: string) => {
+    updateCssVariables: () => {
       const color = getColor()
-      const themeToUse = currentTheme || theme
-      const colors: { [key: string]: string } =
-        themeToUse === 'dark' ? color.dark : color.root
       
-      for (const key in colors) {
-        document.documentElement.style.setProperty(key, colors[key])
+      // Only update color-specific variables, not theme variables
+      // Theme variables (background, foreground, etc.) are handled by CSS
+      const colorSpecificVars = {
+        "--primary": color.root["--primary"],
+        "--primary-foreground": color.root["--primary-foreground"],
+        "--ring": color.root["--ring"],
+        "--sidebar-primary": color.root["--sidebar-primary"],
+        "--sidebar-primary-foreground": color.root["--sidebar-primary-foreground"],
+        "--sidebar-ring": color.root["--sidebar-ring"],
       }
+      
+      // Apply color-specific variables
+      for (const [key, value] of Object.entries(colorSpecificVars)) {
+        document.documentElement.style.setProperty(key, value)
+      }
+      
+      console.log('ColorProvider: Applied color variant:', color.name)
     },
   }
 }

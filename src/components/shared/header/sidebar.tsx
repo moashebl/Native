@@ -1,8 +1,10 @@
+'use client'
+
 import * as React from 'react'
 import Link from 'next/link'
 import { X, ChevronRight, UserCircle, MenuIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { SignOut } from '@/lib/actions/user.actions'
+import { useSession, signOut } from 'next-auth/react'
 import {
   Drawer,
   DrawerClose,
@@ -12,14 +14,44 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer'
-import { auth } from '@/../auth'
+import { useRouter } from 'next/navigation'
+import { toast } from '@/hooks/use-toast'
 
-export default async function Sidebar({
+export default function Sidebar({
   categories,
 }: {
   categories: string[]
 }) {
-  const session = await auth()
+  const { data: session, status } = useSession()
+  const isAuthenticated = status === 'authenticated'
+  const isLoading = status === 'loading'
+  const router = useRouter()
+
+  const handleSignOut = async () => {
+    try {
+      await signOut({ 
+        redirect: false,
+        callbackUrl: '/'
+      })
+      
+      toast({
+        title: 'Success',
+        description: 'Signed out successfully',
+      })
+      
+      // Force router refresh to update all components
+      router.refresh()
+      
+      // Optional: Redirect to home page
+      router.push('/')
+    } catch {
+      toast({
+        title: 'Error',
+        description: 'Failed to sign out. Please try again.',
+        variant: 'destructive',
+      })
+    }
+  }
 
   return (
     <Drawer direction='left'>
@@ -34,11 +66,15 @@ export default async function Sidebar({
             <DrawerHeader>
               <DrawerTitle className='flex items-center'>
                 <UserCircle className='h-6 w-6 mr-2' />
-                {session ? (
+                {isLoading ? (
+                  <span className='text-lg font-semibold'>
+                    Loading...
+                  </span>
+                ) : isAuthenticated ? (
                   <DrawerClose asChild>
                     <Link href='/account'>
                       <span className='text-lg font-semibold'>
-                        Hello, {session.user.name}
+                        Hello, {session?.user?.name || 'User'}
                       </span>
                     </Link>
                   </DrawerClose>
@@ -65,7 +101,9 @@ export default async function Sidebar({
           {/* Shop By Category */}
           <div className='flex-1 overflow-y-auto'>
             <div className='p-4 border-b'>
-              <h2 className='text-lg font-semibold'>Shop By Department</h2>
+              <h2 className='text-lg font-semibold'>
+                Shop By Department
+              </h2>
             </div>
             <nav className='flex flex-col'>
               {categories.map((category) => (
@@ -85,7 +123,9 @@ export default async function Sidebar({
           {/* Setting and Help */}
           <div className='border-t flex flex-col '>
             <div className='p-4'>
-              <h2 className='text-lg font-semibold'>Help & Settings</h2>
+              <h2 className='text-lg font-semibold'>
+                Help & Settings
+              </h2>
             </div>
             <DrawerClose asChild>
               <Link href='/account' className='item-button'>
@@ -97,15 +137,18 @@ export default async function Sidebar({
                 Customer Service
               </Link>
             </DrawerClose>
-            {session ? (
-              <form action={SignOut} className='w-full'>
-                <Button
-                  className='w-full justify-start item-button text-base'
-                  variant='ghost'
-                >
-                  Sign out
-                </Button>
-              </form>
+            {isLoading ? (
+              <div className='item-button text-base text-muted-foreground'>
+                Loading...
+              </div>
+            ) : isAuthenticated ? (
+              <Button
+                className='w-full justify-start item-button text-base'
+                variant='ghost'
+                onClick={handleSignOut}
+              >
+                Sign out
+              </Button>
             ) : (
               <Link href='/sign-in' className='item-button'>
                 Sign in

@@ -1,21 +1,15 @@
-import useCartStore from '@/hooks/use-cart-store'
-import { cn } from '@/lib/utils'
-import Link from 'next/link'
 import React from 'react'
+import Link from 'next/link'
 import { Button, buttonVariants } from '../ui/button'
 import { Separator } from '../ui/separator'
-import { ScrollArea } from '../ui/scroll-area'
-import Image from 'next/image'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { TrashIcon } from 'lucide-react'
+import Image from 'next/image'
+import { ScrollArea } from '../ui/scroll-area'
+import useCartStore from '@/hooks/use-cart-store'
+import useSettingStore from '@/hooks/use-setting-store'
 import ProductPrice from './product/product-price'
-import { FREE_SHIPPING_MIN_PRICE } from '@/lib/constants'
+import { cn } from '@/lib/utils'
 
 export default function CartSidebar() {
   const {
@@ -23,17 +17,22 @@ export default function CartSidebar() {
     updateItem,
     removeItem,
   } = useCartStore()
+  const {
+    setting: {
+      common: { freeShippingMinPrice },
+    },
+  } = useSettingStore()
 
   return (
-    <div className='w-36 overflow-y-auto'>
-      <div className={`fixed border-l h-full`}>
-        <div className='p-2 h-full flex flex-col gap-2 justify-start items-center'>
+    <div className='w-32 overflow-y-auto'>
+      <div className='w-32 fixed h-full border-l'>
+        <div className='p-2 h-full flex flex-col gap-2 justify-center items-center'>
           <div className='text-center space-y-2'>
-            <div> Subtotal</div>
-            <div className='font-bold'>
+            <div>Subtotal</div>
+            <div className='font-bold '>
               <ProductPrice price={itemsPrice} plain />
             </div>
-            {itemsPrice > FREE_SHIPPING_MIN_PRICE && (
+            {itemsPrice > freeShippingMinPrice && (
               <div className=' text-center text-xs'>
                 Your order qualifies for FREE Shipping
               </div>

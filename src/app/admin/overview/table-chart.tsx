@@ -1,83 +1,83 @@
 'use client'
-import { getMonthName } from '@/lib/utils'
-import Image from 'next/image'
-import Link from 'next/link'
-import React from 'react'
-import ProductPrice from '@/components/shared/product/product-price'
 
-type TableChartProps = {
-  labelType: 'month' | 'product'
-  data: {
-    label: string
-    image?: string
-    value: number
-    id?: string
-  }[]
-}
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 
-interface ProgressBarProps {
-  value: number // Accepts a number between 0 and 100
-  className?: string
-}
+const data = [
+  {
+    name: 'Jan',
+    total: Math.floor(Math.random() * 5000) + 1000,
+  },
+  {
+    name: 'Feb',
+    total: Math.floor(Math.random() * 5000) + 1000,
+  },
+  {
+    name: 'Mar',
+    total: Math.floor(Math.random() * 5000) + 1000,
+  },
+  {
+    name: 'Apr',
+    total: Math.floor(Math.random() * 5000) + 1000,
+  },
+  {
+    name: 'May',
+    total: Math.floor(Math.random() * 5000) + 1000,
+  },
+  {
+    name: 'Jun',
+    total: Math.floor(Math.random() * 5000) + 1000,
+  },
+  {
+    name: 'Jul',
+    total: Math.floor(Math.random() * 5000) + 1000,
+  },
+  {
+    name: 'Aug',
+    total: Math.floor(Math.random() * 5000) + 1000,
+  },
+  {
+    name: 'Sep',
+    total: Math.floor(Math.random() * 5000) + 1000,
+  },
+  {
+    name: 'Oct',
+    total: Math.floor(Math.random() * 5000) + 1000,
+  },
+  {
+    name: 'Nov',
+    total: Math.floor(Math.random() * 5000) + 1000,
+  },
+  {
+    name: 'Dec',
+    total: Math.floor(Math.random() * 5000) + 1000,
+  },
+]
 
-const ProgressBar: React.FC<ProgressBarProps> = ({ value }) => {
-  // Ensure value stays within 0-100 range
-  const boundedValue = Math.min(100, Math.max(0, value))
-
+export default function TableChart() {
   return (
-    <div className='relative w-full h-4 overflow-hidden'>
-      <div
-        className='bg-primary h-full transition-all duration-300 rounded-lg'
-        style={{
-          width: `${boundedValue}%`,
-          float: 'right', // Aligns the bar to start from the right
-        }}
-      />
-    </div>
-  )
-}
-
-export default function TableChart({
-  labelType = 'month',
-  data = [],
-}: TableChartProps) {
-  const max = Math.max(...data.map((item) => item.value))
-  const dataWithPercentage = data.map((x) => ({
-    ...x,
-    label: labelType === 'month' ? getMonthName(x.label) : x.label,
-    percentage: Math.round((x.value / max) * 100),
-  }))
-  return (
-    <div className='space-y-3'>
-      {dataWithPercentage.map(({ label, id, value, image, percentage }) => (
-        <div
-          key={label}
-          className='grid grid-cols-[100px_1fr_80px] md:grid-cols-[250px_1fr_80px] gap-2 space-y-4  '
-        >
-          {image ? (
-            <Link className='flex items-end' href={`/admin/products/${id}`}>
-              <Image
-                className='rounded border  aspect-square object-scale-down max-w-full h-auto mx-auto mr-1'
-                src={image!}
-                alt={label}
-                width={36}
-                height={36}
-              />
-              <p className='text-center text-sm whitespace-nowrap overflow-hidden text-ellipsis'>
-                {label}
-              </p>
-            </Link>
-          ) : (
-            <div className='flex items-end text-sm'>{label}</div>
-          )}
-
-          <ProgressBar value={percentage} />
-
-          <div className='text-sm text-right flex items-center'>
-            <ProductPrice price={value} plain />
-          </div>
-        </div>
-      ))}
-    </div>
+    <ResponsiveContainer width='100%' height={350}>
+      <BarChart data={data}>
+        <XAxis
+          dataKey='name'
+          stroke='#888888'
+          fontSize={12}
+          tickLine={false}
+          axisLine={false}
+        />
+        <YAxis
+          stroke='#888888'
+          fontSize={12}
+          tickLine={false}
+          axisLine={false}
+          tickFormatter={(value) => `$${value.toLocaleString()}`}
+        />
+        <Bar
+          dataKey='total'
+          fill='currentColor'
+          radius={[4, 4, 0, 0]}
+          className='fill-primary'
+        />
+      </BarChart>
+    </ResponsiveContainer>
   )
 }

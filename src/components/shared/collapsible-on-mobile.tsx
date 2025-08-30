@@ -25,7 +25,6 @@ export default function CollapsibleOnMobile({
     if (deviceType === 'mobile') setOpen(false)
     else if (deviceType === 'desktop') setOpen(true)
   }, [deviceType, searchParams])
-  if (deviceType === 'unknown') return null
   return (
     <Collapsible open={open}>
       <CollapsibleTrigger asChild>

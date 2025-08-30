@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   description: 'Our privacy policy explains how we collect, use, and protect your personal information.',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default function PrivacyPolicyPage() {
   return (
     <div className="container mx-auto py-8 px-4">

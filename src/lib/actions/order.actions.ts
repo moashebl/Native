@@ -3,14 +3,14 @@ import { formatError, calcDeliveryDateAndPrice } from '../utils'
 
 // Re-export for use in other modules
 export { calcDeliveryDateAndPrice }
-import { PAGE_SIZE } from '../constants'
+import { getSetting } from './setting.actions'
 import { connectToDatabase } from '../db'
 import { auth } from '../../../auth'
 import { OrderInputSchema } from '../validator'
 import Order, { IOrder } from '../db/models/order.model'
 import { revalidatePath } from 'next/cache'
-import { sendAskReviewOrderItems, sendPurchaseReceipt } from '../../../emails'
-import { paypal } from '../paypal'
+import { sendAskReviewOrderItems, sendPurchaseReceipt } from '@/emails'
+
 import { Cart, IOrderList } from '@/types'  
 import { DateRange } from 'react-day-picker'
 import Product from '../db/models/product.model'
@@ -92,10 +92,14 @@ export async function getOrderSummary(date: DateRange) {
   const topSalesCategories = await getTopSalesCategories(date)
   const topSalesProducts = await getTopSalesProducts(date)
 
+  const {
+    common: { pageSize },
+  } = await getSetting()
+  const limit = pageSize
   const latestOrders = await Order.find()
     .populate('user', 'name')
     .sort({ createdAt: 'desc' })
-    .limit(PAGE_SIZE)
+    .limit(limit)
   return {
     ordersCount,
     productsCount,
@@ -252,12 +256,14 @@ export const createOrderFromCart = async (
   clientSideCart: Cart,
   userId: string
 ) => {
+  const { availableDeliveryDates } = await getSetting()
   const cart = {
     ...clientSideCart,
     ...calcDeliveryDateAndPrice({
       items: clientSideCart.items,
       shippingAddress: clientSideCart.shippingAddress,
       deliveryDateIndex: clientSideCart.deliveryDateIndex,
+      availableDeliveryDates,
     }),
   }
 
@@ -280,68 +286,7 @@ export async function getOrderById(orderId: string): Promise<IOrder> {
   return JSON.parse(JSON.stringify(order))
 }
 
-export async function createPayPalOrder(orderId: string) {
-  await connectToDatabase()
-  try {
-    const order = await Order.findById(orderId)
-    if (order) {
-      const paypalOrder = await paypal.createOrder(order.totalPrice)
-      order.paymentResult = {
-        id: paypalOrder.id,
-        email_address: '',
-        status: '',
-        pricePaid: '0',
-      }
-      await order.save()
-      return {
-        success: true,
-        message: 'PayPal order created successfully',
-        data: paypalOrder.id,
-      }
-    } else {
-      throw new Error('Order not found')
-    }
-  } catch (err) {
-    return { success: false, message: formatError(err) }
-  }
-}
 
-export async function approvePayPalOrder(
-  orderId: string,
-  data: { orderID: string }
-) {
-  await connectToDatabase()
-  try {
-    const order = await Order.findById(orderId).populate('user', 'email')
-    if (!order) throw new Error('Order not found')
-
-    const captureData = await paypal.capturePayment(data.orderID)
-    if (
-      !captureData ||
-      captureData.id !== order.paymentResult?.id ||
-      captureData.status !== 'COMPLETED'
-    )
-      throw new Error('Error in paypal payment')
-    order.isPaid = true
-    order.paidAt = new Date()
-    order.paymentResult = {
-      id: captureData.id,
-      status: captureData.status,
-      email_address: captureData.payer.email_address,
-      pricePaid:
-        captureData.purchase_units[0]?.payments?.captures[0]?.amount?.value,
-    }
-    await order.save()
-    await sendPurchaseReceipt({ order })
-    revalidatePath(`/account/orders/${orderId}`)
-    return {
-      success: true,
-      message: 'Your order has been successfully paid by PayPal',
-    }
-  } catch (err) {
-    return { success: false, message: formatError(err) }
-  }
-}
 // GET
 export async function getMyOrders({
   limit,
@@ -350,7 +295,10 @@ export async function getMyOrders({
   limit?: number
   page: number
 }) {
-  limit = limit || PAGE_SIZE
+  const {
+    common: { pageSize },
+  } = await getSetting()
+  limit = limit || pageSize
   await connectToDatabase()
   const session = await auth()
   if (!session) {
@@ -396,7 +344,10 @@ export async function getAllOrders({
   limit?: number
   page: number
 }) {
-  limit = limit || PAGE_SIZE
+  const {
+    common: { pageSize },
+  } = await getSetting()
+  limit = limit || pageSize
   await connectToDatabase()
   const skipAmount = (Number(page) - 1) * limit
   const orders = await Order.find()

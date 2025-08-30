@@ -28,8 +28,8 @@ import SalesAreaChart from './sales-area-chart'
 import { CalendarDateRangePicker } from './date-range-picker'
 import { IOrderList } from '@/types'
 import ProductPrice from '@/components/shared/product/product-price'
-import TableChart from './table-chart'
 import { Skeleton } from '@/components/ui/skeleton'
+import TableChart from './table-chart'
 
 export default function OverviewReport() {
   const [date, setDate] = useState<DateRange | undefined>({
@@ -39,6 +39,7 @@ export default function OverviewReport() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<{ [key: string]: any }>()
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isPending, startTransition] = useTransition()
   useEffect(() => {
@@ -82,7 +83,6 @@ export default function OverviewReport() {
         </div>
       </div>
     )
-
   return (
     <div>
       <div className='flex items-center justify-between mb-2'>
@@ -111,7 +111,9 @@ export default function OverviewReport() {
           </Card>
           <Card>
             <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-              <CardTitle className='text-sm font-medium'>Sales</CardTitle>
+              <CardTitle className='text-sm font-medium'>
+                Sales
+              </CardTitle>
               <CreditCard />
             </CardHeader>
             <CardContent className='space-y-2'>
@@ -127,7 +129,9 @@ export default function OverviewReport() {
           </Card>
           <Card>
             <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-              <CardTitle className='text-sm font-medium'>Customers</CardTitle>
+              <CardTitle className='text-sm font-medium'>
+                Customers
+              </CardTitle>
               <Users />
             </CardHeader>
             <CardContent className='space-y-2'>
@@ -141,14 +145,16 @@ export default function OverviewReport() {
           </Card>
           <Card>
             <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-              <CardTitle className='text-sm font-medium'>Products</CardTitle>
+              <CardTitle className='text-sm font-medium'>
+                Products
+              </CardTitle>
               <Barcode />
             </CardHeader>
             <CardContent className='space-y-2'>
               <div className='text-2xl font-bold'>{data.productsCount}</div>
               <div>
                 <Link className='text-xs' href='/admin/products'>
-                  products
+                  View products
                 </Link>
               </div>
             </CardContent>
@@ -169,10 +175,12 @@ export default function OverviewReport() {
           <Card>
             <CardHeader>
               <CardTitle>How much you’re earning</CardTitle>
-              <CardDescription>Estimated · Last 6 months</CardDescription>
+              <CardDescription>
+                Estimated · Last 6 months
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <TableChart data={data.monthlySales} labelType='month' />
+              <TableChart />
             </CardContent>
           </Card>
           <Card>
@@ -184,7 +192,7 @@ export default function OverviewReport() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <TableChart data={data.topSalesProducts} labelType='product' />
+              <TableChart />
             </CardContent>
           </Card>
         </div>

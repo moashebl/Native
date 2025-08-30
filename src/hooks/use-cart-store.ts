@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware'
 
 import { Cart, OrderItem, ShippingAddress } from '@/types'
 import { calcDeliveryDateAndPrice } from '@/lib/actions/order.actions'
+import { getSetting } from '@/lib/actions/setting.actions'
 
 const initialState: Cart = {
   items: [],
@@ -61,6 +62,7 @@ const useCartStore = create(
             )
           : [...items, { ...item, quantity }]
 
+        const { availableDeliveryDates } = await getSetting()
         set({
           cart: {
             ...get().cart,
@@ -69,6 +71,7 @@ const useCartStore = create(
               items: updatedCartItems,
               shippingAddress: get().cart.shippingAddress,
               deliveryDateIndex: get().cart.deliveryDateIndex,
+              availableDeliveryDates,
             })),
           },
         })
@@ -100,6 +103,7 @@ const useCartStore = create(
             ? { ...exist, quantity: quantity }
             : x
         )
+        const { availableDeliveryDates } = await getSetting()
         set({
           cart: {
             ...get().cart,
@@ -108,6 +112,7 @@ const useCartStore = create(
               items: updatedCartItems,
               shippingAddress: get().cart.shippingAddress,
               deliveryDateIndex: get().cart.deliveryDateIndex,
+              availableDeliveryDates,
             })),
           },
         })
@@ -121,6 +126,7 @@ const useCartStore = create(
             x.color !== item.color ||
             x.size !== item.size
         )
+        const { availableDeliveryDates } = await getSetting()
         set({
           cart: {
             ...get().cart,
@@ -129,6 +135,7 @@ const useCartStore = create(
               items: updatedCartItems,
               shippingAddress: get().cart.shippingAddress,
               deliveryDateIndex: get().cart.deliveryDateIndex,
+              availableDeliveryDates,
             })),
           },
         })
@@ -139,6 +146,7 @@ const useCartStore = create(
       },
 
       setShippingAddress: async (shippingAddress: ShippingAddress) => {
+        const { availableDeliveryDates } = await getSetting()
         set({
           cart: {
             ...get().cart,
@@ -147,6 +155,7 @@ const useCartStore = create(
               items: get().cart.items,
               shippingAddress,
               deliveryDateIndex: get().cart.deliveryDateIndex,
+              availableDeliveryDates,
             })),
           },
         })
@@ -162,6 +171,7 @@ const useCartStore = create(
       },
 
       setDeliveryDateIndex: async (index: number) => {
+        const { availableDeliveryDates } = await getSetting()
         set({
           cart: {
             ...get().cart,
@@ -169,6 +179,7 @@ const useCartStore = create(
               items: get().cart.items,
               shippingAddress: get().cart.shippingAddress,
               deliveryDateIndex: index,
+              availableDeliveryDates,
             })),
           },
         })

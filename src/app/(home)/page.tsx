@@ -1,27 +1,46 @@
+import BrowsingHistoryList from '@/components/shared/browsing-history-list'
 import { HomeCard } from '@/components/shared/home/home-card'
 import { HomeCarousel } from '@/components/shared/home/home-carousel'
-import { getAllCategories, getProductsByTag, getProductsForCard } from '@/lib/actions/product.actions'
-import { toSlug } from '@/lib/utils'
-import data from '@/lib/data'
-import { Card, CardContent } from '@/components/ui/card'
 import ProductSlider from '@/components/shared/product/product-slider'
-import BrowsingHistoryList from '@/components/shared/browsing-history-list'
+import { Card, CardContent } from '@/components/ui/card'
 
-export default async function Page() {
-    const todaysDeals = await getProductsByTag({ tag: 'todays-deal' })
-    const bestSellingProducts = await getProductsByTag({ tag: 'best-seller' })
-  const categories = (await getAllCategories()).slice(0, 4) 
+import {
+  getProductsForCard,
+  getProductsByTag,
+  getAllCategories,
+} from '@/lib/actions/product.actions'
+import { getSetting } from '@/lib/actions/setting.actions'
+import { toSlug } from '@/lib/utils'
+
+export default async function HomePage() {
+  const { carousels } = await getSetting()
+  
+  console.log('Carousels from database:', carousels)
+  
+  // Ensure we have at least one carousel with the correct title
+  const defaultCarousel = {
+    title: "Welcome to Native House",
+    url: "/",
+    image: "/images/banner1.jpg",
+    buttonCaption: "Shop Now",
+  }
+  
+  const displayCarousels = carousels && carousels.length > 0 ? carousels : [defaultCarousel]
+  
+  console.log('Display carousels:', displayCarousels)
+  
+  const todaysDeals = await getProductsByTag({ tag: 'todays-deal' })
+  const bestSellingProducts = await getProductsByTag({ tag: 'best-seller' })
+
+  const categories = (await getAllCategories()).slice(0, 4)
   const newArrivals = await getProductsForCard({
     tag: 'new-arrival',
-    limit: 4,
   })
   const featureds = await getProductsForCard({
     tag: 'featured',
-    limit: 4,
   })
   const bestSellers = await getProductsForCard({
     tag: 'best-seller',
-    limit: 4,
   })
   const cards = [
     {
@@ -32,7 +51,7 @@ export default async function Page() {
       },
       items: categories.map((category) => ({
         name: category,
-                      image: `/images/${toSlug(category)}.jpg`,
+        image: `/images/${toSlug(category)}.jpg`,
         href: `/search?category=${category}`,
       })),
     },
@@ -64,26 +83,33 @@ export default async function Page() {
 
   return (
     <>
-      <HomeCarousel items={data.carousels} />
+      <HomeCarousel 
+        items={displayCarousels.map(item => ({
+          ...item,
+          title: item.title,
+          buttonCaption: item.buttonCaption
+        }))} 
+      />
       <div className='md:p-4 md:space-y-4 bg-border'>
         <HomeCard cards={cards} />
         <Card className='w-full rounded-none'>
           <CardContent className='p-4 items-center gap-3'>
-            <ProductSlider title={"Today's Deals"} products={todaysDeals} />
+            <ProductSlider title="Today's Deals" products={todaysDeals} />
           </CardContent>
         </Card>
         <Card className='w-full rounded-none'>
-    <CardContent className='p-4 items-center gap-3'>
-      <ProductSlider
-        title='Best Selling Products'
-        products={bestSellingProducts}
-        hideDetails
-      />
-    </CardContent>
-  </Card>
+          <CardContent className='p-4 items-center gap-3'>
+            <ProductSlider
+              title='Best Selling Products'
+              products={bestSellingProducts}
+              hideDetails
+            />
+          </CardContent>
+        </Card>
       </div>
+
       <div className='p-4 bg-background'>
-  <BrowsingHistoryList />
+        <BrowsingHistoryList />
       </div>
     </>
   )

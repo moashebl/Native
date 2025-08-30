@@ -1,20 +1,21 @@
 'use client'
-import ProductPrice from '@/components/shared/product/product-price'
-import { buttonVariants } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
+
+import React from 'react'
+import Link from 'next/link'
 import { CheckCircle2Icon } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import useCartStore from '@/hooks/use-cart-store'
-import { FREE_SHIPPING_MIN_PRICE } from '@/lib/constants'
+import useSettingStore from '@/hooks/use-setting-store'
+import { Card, CardContent } from '@/components/ui/card'
+import { buttonVariants } from '@/components/ui/button'
+import ProductPrice from '@/components/shared/product/product-price'
 import BrowsingHistoryList from '@/components/shared/browsing-history-list'
+import { cn } from '@/lib/utils'
 
 export default function CartAddItem({ itemId }: { itemId: string }) {
-  const {
-    cart: { items, itemsPrice },
-  } = useCartStore()
+  const { cart: { items, itemsPrice } } = useCartStore()
+  const { setting: { common: { freeShippingMinPrice } } } = useSettingStore()
   const item = items.find((x) => x.clientId === itemId)
 
   if (!item) return notFound()
@@ -23,7 +24,10 @@ export default function CartAddItem({ itemId }: { itemId: string }) {
       <div className='grid grid-cols-1 md:grid-cols-2 md:gap-4'>
         <Card className='w-full rounded-none'>
           <CardContent className='flex h-full items-center justify-center  gap-3 py-4'>
-            <Link href={`/product/${item.slug}`}>
+            <Link
+              href={`/product/${item.slug}`}
+              className='text-lg hover:no-underline'
+            >
               <Image
                 src={item.image}
                 alt={item.name}
@@ -37,7 +41,7 @@ export default function CartAddItem({ itemId }: { itemId: string }) {
             </Link>
             <div>
               <h3 className='text-xl font-bold flex gap-2 my-2'>
-                <CheckCircle2Icon className='h-6 w-6 text-Violet-700' />
+                <CheckCircle2Icon className='h-6 w-6 text-green-700' />
                 Added to cart
               </h3>
               <p className='text-sm'>
@@ -55,21 +59,21 @@ export default function CartAddItem({ itemId }: { itemId: string }) {
           <CardContent className='p-4 h-full'>
             <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
               <div className='flex justify-center items-center'>
-                {itemsPrice < FREE_SHIPPING_MIN_PRICE ? (
+                {itemsPrice < freeShippingMinPrice ? (
                   <div className='text-center '>
-                    Add
-                    <span className='text-Violet-700'>
+                    Add{' '}
+                    <span className='text-green-700'>
                       <ProductPrice
-                        price={FREE_SHIPPING_MIN_PRICE - itemsPrice}
+                        price={freeShippingMinPrice - itemsPrice}
                         plain
                       />
-                    </span> of eligible items to your order to qualify for FREE
-                    Shipping
+                    </span>{' '}
+                    of eligible items to your order to qualify for FREE Shipping
                   </div>
                 ) : (
                   <div className='flex items-center'>
                     <div>
-                      <span className='text-Violet-700'>
+                      <span className='text-green-700'>
                         Your order qualifies for FREE Shipping.
                       </span>{' '}
                       Choose this option at checkout.
@@ -103,7 +107,6 @@ export default function CartAddItem({ itemId }: { itemId: string }) {
           </CardContent>
         </Card>
       </div>
-
       <BrowsingHistoryList />
     </div>
   )

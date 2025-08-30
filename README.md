@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Native - Modern E-commerce Platform
+
+Native is a modern, full-stack e-commerce application built with Next.js, featuring internationalization, cash-on-delivery payments, and a complete admin dashboard.
 
 ## Environment Setup
 
@@ -6,7 +8,7 @@ Before running the application, you need to set up your environment variables. C
 
 ```bash
 # MongoDB Connection String
-MONGODB_URI=mongodb://localhost:27017/aldora-house
+MONGODB_URI=mongodb://localhost:27017/native-house
 
 # NextAuth Configuration
 NEXTAUTH_URL=http://localhost:3000

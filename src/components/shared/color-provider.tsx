@@ -15,7 +15,6 @@ export function ColorProvider({
   
   React.useEffect(() => {
     const unsubscribe = colorStore.subscribe((state) => {
-      console.log('Store state changed:', state)
       setStoreState(state)
     })
     return unsubscribe
@@ -23,10 +22,8 @@ export function ColorProvider({
   
   React.useEffect(() => {
     if (theme && color) {
-      console.log('ColorProvider: Theme changed to:', theme)
-      console.log('ColorProvider: Color changed to:', color.name)
-      console.log('ColorProvider: Store state:', storeState)
-      updateCssVariables(theme)
+      console.log('ColorProvider: theme =', theme, 'color =', color.name)
+      updateCssVariables()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [theme, color, storeState])

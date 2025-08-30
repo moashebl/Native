@@ -1,7 +1,7 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  images: {
+    images: {
     remotePatterns: [
       {
         protocol: 'https',
@@ -9,6 +9,31 @@ const nextConfig: NextConfig = {
         port: '',
       },
     ],
+  },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        crypto: false,
+        'child_process': false,
+        'fs/promises': false,
+        dns: false,
+        'timers/promises': false,
+        // MongoDB optional dependencies
+        kerberos: false,
+        '@mongodb-js/zstd': false,
+        '@aws-sdk/credential-providers': false,
+        'gcp-metadata': false,
+        snappy: false,
+        socks: false,
+        aws4: false,
+        'mongodb-client-encryption': false,
+      }
+    }
+    return config
   },
   turbopack: {
     rules: {
@@ -18,6 +43,6 @@ const nextConfig: NextConfig = {
       },
     },
   },
-};
+}
 
-export default nextConfig;
+export default nextConfig

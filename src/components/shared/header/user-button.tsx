@@ -1,4 +1,4 @@
-import { auth } from '../../../../auth'
+'use client'
 
 import { Button, buttonVariants } from '@/components/ui/button'
 import {
@@ -9,23 +9,73 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { SignOut } from '@/lib/actions/user.actions'
 import { cn } from '@/lib/utils'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDownIcon } from 'lucide-react'
 import Link from 'next/link'
+import { useSession, signOut } from 'next-auth/react'
+import { useLanguage } from '../language-provider'
+import { useRouter } from 'next/navigation'
+import { toast } from '@/hooks/use-toast'
 
-export default async function UserButton() {
-  const session = await auth()
+export default function UserButton() {
+  const { data: session, status } = useSession()
+  const { t } = useLanguage()
+  const router = useRouter()
+  
+  // Show loading state while session is being determined
+  if (status === 'loading') {
+    return (
+      <div className='flex gap-2 items-center'>
+        <div className='header-button flex items-center'>
+          <div className='flex flex-col text-xs text-left'>
+            <span>Loading...</span>
+            <span className='font-bold'>{t('Header.Account & Orders')}</span>
+          </div>
+          <ChevronDownIcon />
+        </div>
+      </div>
+    )
+  }
+
+  const handleSignOut = async () => {
+    try {
+      await signOut({ 
+        redirect: false,
+        callbackUrl: '/'
+      })
+      
+      toast({
+        title: 'Success',
+        description: 'Signed out successfully',
+      })
+      
+      // Force router refresh to update all components
+      router.refresh()
+      
+      // Optional: Redirect to home page
+      router.push('/')
+    } catch {
+      toast({
+        title: 'Error',
+        description: 'Failed to sign out. Please try again.',
+        variant: 'destructive',
+      })
+    }
+  }
+  
   return (
     <div className='flex gap-2 items-center'>
       <DropdownMenu>
         <DropdownMenuTrigger className='header-button' asChild>
           <div className='flex items-center'>
             <div className='flex flex-col text-xs text-left'>
-              <span>Hello, {session ? session.user.name : 'sign in'}</span>
-              <span className='font-bold'>Account & Orders</span>
+              <span>
+                {t('Header.Hello')},{' '}
+                {session ? session.user.name : t('Header.sign in')}
+              </span>
+              <span className='font-bold'>{t('Header.Account & Orders')}</span>
             </div>
-            <ChevronDown />
+            <ChevronDownIcon />
           </div>
         </DropdownMenuTrigger>
         {session ? (
@@ -42,27 +92,26 @@ export default async function UserButton() {
             </DropdownMenuLabel>
             <DropdownMenuGroup>
               <Link className='w-full' href='/account'>
-                <DropdownMenuItem>Your account</DropdownMenuItem>
+                <DropdownMenuItem>{t('Header.Your account')}</DropdownMenuItem>
               </Link>
               <Link className='w-full' href='/account/orders'>
-                <DropdownMenuItem>Your orders</DropdownMenuItem>
+                <DropdownMenuItem>{t('Header.Your orders')}</DropdownMenuItem>
               </Link>
 
               {session.user.role === 'Admin' && (
                 <Link className='w-full' href='/admin/overview'>
-                  <DropdownMenuItem>Admin</DropdownMenuItem>
+                  <DropdownMenuItem>{t('Header.Admin')}</DropdownMenuItem>
                 </Link>
               )}
             </DropdownMenuGroup>
             <DropdownMenuItem className='p-0 mb-1'>
-              <form action={SignOut} className='w-full'>
-                <Button
-                  className='w-full py-4 px-2 h-4 justify-start'
-                  variant='ghost'
-                >
-                  Sign out
-                </Button>
-              </form>
+              <Button
+                className='w-full py-4 px-2 h-4 justify-start'
+                variant='ghost'
+                onClick={handleSignOut}
+              >
+                {t('Header.Sign out')}
+              </Button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         ) : (
@@ -73,13 +122,14 @@ export default async function UserButton() {
                   className={cn(buttonVariants(), 'w-full')}
                   href='/sign-in'
                 >
-                  Sign in
+                  {t('Header.Sign in')}
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuLabel>
               <div className='font-normal'>
-                New Customer? <Link href='/sign-up'>Sign up</Link>
+                {t('Header.New Customer')}?{' '}
+                <Link href='/sign-up'>{t('Header.Sign up')}</Link>
               </div>
             </DropdownMenuLabel>
           </DropdownMenuContent>

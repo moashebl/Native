@@ -1,9 +1,11 @@
 'use client'
-import { redirect, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
+import useSettingStore from '@/hooks/use-setting-store'
 import {
   Form,
   FormControl,
@@ -14,13 +16,12 @@ import {
 } from '@/components/ui/form'
 import { useForm } from 'react-hook-form'
 import { IUserSignUp } from '@/types'
-import { registerUser, signInWithCredentials } from '@/lib/actions/user.actions'
+import { registerUser } from '@/lib/actions/user.actions'
 import { toast } from '@/hooks/use-toast'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { UserSignUpSchema } from '@/lib/validator'
 import { Separator } from '@/components/ui/separator'
-import { isRedirectError } from 'next/dist/client/components/redirect-error'
-import { APP_NAME } from '@/lib/constants'
+import { signIn } from 'next-auth/react'
 
 const signUpDefaultValues =
   process.env.NODE_ENV === 'development'
@@ -37,9 +38,14 @@ const signUpDefaultValues =
         confirmPassword: '',
       }
 
-export default function SignUpForm() {
+export default function CredentialsSignInForm() {
+  const {
+    setting: { site },
+  } = useSettingStore()
   const searchParams = useSearchParams()
+  const router = useRouter()
   const callbackUrl = searchParams.get('callbackUrl') || '/'
+  const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm<IUserSignUp>({
     resolver: zodResolver(UserSignUpSchema),
@@ -49,6 +55,7 @@ export default function SignUpForm() {
   const { control, handleSubmit } = form
 
   const onSubmit = async (data: IUserSignUp) => {
+    setIsLoading(true)
     try {
       const res = await registerUser(data)
       if (!res.success) {
@@ -59,20 +66,40 @@ export default function SignUpForm() {
         })
         return
       }
-      await signInWithCredentials({
+      
+      // Auto sign-in after successful registration
+      const signInResult = await signIn('credentials', {
         email: data.email,
         password: data.password,
+        redirect: false,
       })
-      redirect(callbackUrl)
-    } catch (error) {
-      if (isRedirectError(error)) {
-        throw error
+
+      if (signInResult?.error) {
+        toast({
+          title: 'Account Created',
+          description: 'Account created successfully. Please sign in.',
+        })
+        router.push('/sign-in')
+      } else if (signInResult?.ok) {
+        toast({
+          title: 'Success',
+          description: 'Account created and signed in successfully',
+        })
+        
+        // Small delay to ensure session is established
+        setTimeout(() => {
+          router.push(callbackUrl)
+          router.refresh()
+        }, 500)
       }
+    } catch {
       toast({
         title: 'Error',
-        description: 'Invalid email or password',
+        description: 'Something went wrong. Please try again.',
         variant: 'destructive',
       })
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -144,10 +171,12 @@ export default function SignUpForm() {
             )}
           />
           <div>
-            <Button type='submit'>Sign Up</Button>
+            <Button type='submit' disabled={isLoading}>
+              {isLoading ? 'Signing Up...' : 'Sign Up'}
+            </Button>
           </div>
           <div className='text-sm'>
-            By creating an account, you agree to {APP_NAME}&apos;s{' '}
+            By creating an account, you agree to {site.name}&apos;s{' '}
             <Link href='/page/conditions-of-use'>Conditions of Use</Link> and{' '}
             <Link href='/page/privacy-policy'> Privacy Notice. </Link>
           </div>

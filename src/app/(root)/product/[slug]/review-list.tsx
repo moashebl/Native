@@ -1,9 +1,9 @@
 'use client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Calendar, Check, StarIcon, User } from 'lucide-react'
-import Link from 'next/link'
+
 import { useEffect, useState } from 'react'
-import { SubmitHandler, useForm, Resolver } from 'react-hook-form'
+import { SubmitHandler, useForm } from 'react-hook-form'
 import { useInView } from 'react-intersection-observer'
 import { z } from 'zod'
 
@@ -41,6 +41,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { useToast } from '@/hooks/use-toast'
 import {
   createUpdateReview,
   getReviewByProductId,
@@ -51,15 +52,13 @@ import RatingSummary from '@/components/shared/product/rating-summary'
 import { IProduct } from '@/lib/db/models/product.model'
 import { Separator } from '@/components/ui/separator'
 import { IReviewDetails } from '@/types'
-import { toast } from '@/hooks/use-toast'
 
-const reviewFormDefaultValues = {
-  product: '',
-  user: '',
-  isVerifiedPurchase: false,
+type CustomerReview = z.infer<typeof ReviewInputSchema>
+
+const reviewFormDefaultValues: Partial<CustomerReview> = {
   title: '',
   comment: '',
-  rating: 0,
+  rating: 1,
 }
 
 export default function ReviewList({
@@ -78,11 +77,9 @@ export default function ReviewList({
       const res = await getReviews({ productId: product._id, page: 1 })
       setReviews([...res.data])
       setTotalPages(res.totalPages)
-
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       toast({
-        title: 'Error',
         variant: 'destructive',
         description: 'Error in fetching reviews',
       })
@@ -115,12 +112,13 @@ export default function ReviewList({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inView])
 
-  type CustomerReview = z.infer<typeof ReviewInputSchema>
-  const form = useForm<CustomerReview, unknown, CustomerReview>({
-    resolver: zodResolver(ReviewInputSchema) as Resolver<CustomerReview, unknown, CustomerReview>,
-    defaultValues: reviewFormDefaultValues as CustomerReview,
+  const form = useForm<CustomerReview>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(ReviewInputSchema) as any,
+    defaultValues: reviewFormDefaultValues,
   })
   const [open, setOpen] = useState(false)
+  const { toast } = useToast()
   const onSubmit: SubmitHandler<CustomerReview> = async (values) => {
     const res = await createUpdateReview({
       data: { ...values, product: product._id },
@@ -128,14 +126,12 @@ export default function ReviewList({
     })
     if (!res.success)
       return toast({
-        title: 'Error',
         variant: 'destructive',
         description: res.message,
       })
     setOpen(false)
     reload()
     toast({
-      title: 'Success',
       description: res.message,
     })
   }
@@ -170,7 +166,9 @@ export default function ReviewList({
             <h3 className='font-bold text-lg lg:text-xl'>
               Review this product
             </h3>
-            <p className='text-sm'>Share your thoughts with other customers</p>
+            <p className='text-sm'>
+              Share your thoughts with other customers
+            </p>
             {userId ? (
               <Dialog open={open} onOpenChange={setOpen}>
                 <Button
@@ -183,31 +181,41 @@ export default function ReviewList({
 
                 <DialogContent className='sm:max-w-[425px]'>
                   <Form {...form}>
-                    <form method='post' onSubmit={form.handleSubmit(onSubmit)}>
+                    <form method='post' onSubmit={form.handleSubmit(
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      onSubmit as any
+                    )}>
                       <DialogHeader>
-                        <DialogTitle>Write a customer review</DialogTitle>
+                        <DialogTitle>
+                          Write a customer review
+                        </DialogTitle>
                         <DialogDescription>
                           Share your thoughts with other customers
                         </DialogDescription>
                       </DialogHeader>
                       <div className='grid gap-4 py-4'>
                         <div className='flex flex-col gap-5  '>
-                          <FormField<CustomerReview>
-                            control={form.control}
+                          <FormField
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            control={form.control as any}
                             name='title'
                             render={({ field }) => (
                               <FormItem className='w-full'>
                                 <FormLabel>Title</FormLabel>
                                 <FormControl>
-                                  <Input placeholder='Enter title' {...field} value={typeof field.value === 'boolean' ? String(field.value) : field.value ?? ''} />
+                                  <Input
+                                    placeholder='Enter title'
+                                    {...field}
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
 
-                          <FormField<CustomerReview>
-                            control={form.control}
+                          <FormField
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            control={form.control as any}
                             name='comment'
                             render={({ field }) => (
                               <FormItem className='w-full'>
@@ -216,7 +224,6 @@ export default function ReviewList({
                                   <Textarea
                                     placeholder='Enter comment'
                                     {...field}
-                                    value={typeof field.value === 'boolean' ? String(field.value) : field.value ?? ''}
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -225,19 +232,22 @@ export default function ReviewList({
                           />
                         </div>
                         <div>
-                          <FormField<CustomerReview>
-                            control={form.control}
+                          <FormField
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            control={form.control as any}
                             name='rating'
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Rating</FormLabel>
                                 <Select
-                                  onValueChange={val => field.onChange(Number(val))}
+                                  onValueChange={(value) => field.onChange(Number(value))}
                                   value={field.value.toString()}
                                 >
                                   <FormControl>
                                     <SelectTrigger>
-                                      <SelectValue placeholder='Select a rating' />
+                                      <SelectValue
+                                        placeholder='Select a rating'
+                                      />
                                     </SelectTrigger>
                                   </FormControl>
                                   <SelectContent>
@@ -282,12 +292,12 @@ export default function ReviewList({
             ) : (
               <div>
                 Please{' '}
-                <Link
+                <a
                   href={`/sign-in?callbackUrl=/product/${product.slug}`}
                   className='highlight-link'
                 >
                   sign in
-                </Link>{' '}
+                </a>{' '}
                 to write a review
               </div>
             )}

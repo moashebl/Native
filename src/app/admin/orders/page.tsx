@@ -14,9 +14,10 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { deleteOrder, getAllOrders } from '@/lib/actions/order.actions'
-import { formatDateTime, formatId } from '@/lib/utils'
+import { formatFullDateTime, formatId } from '@/lib/utils'
 import { IOrderList } from '@/types'
 import ProductPrice from '@/components/shared/product/product-price'
+import StatusUpdateButtons from './status-update-buttons'
 
 export const metadata: Metadata = {
   title: 'Admin Orders',
@@ -56,7 +57,7 @@ export default async function OrdersPage(props: {
               <TableRow key={order._id}>
                 <TableCell>{formatId(order._id)}</TableCell>
                 <TableCell>
-                  {formatDateTime(order.createdAt!).dateTime}
+                  {formatFullDateTime(order.createdAt!).fullDateTime}
                 </TableCell>
                 <TableCell>
                   {order.user ? order.user.name : 'Deleted User'}
@@ -66,20 +67,47 @@ export default async function OrdersPage(props: {
                   <ProductPrice price={order.totalPrice} plain />
                 </TableCell>
                 <TableCell>
-                  {order.isPaid && order.paidAt
-                    ? formatDateTime(order.paidAt).dateTime
-                    : 'No'}
+                  <div className="flex items-center gap-2">
+                    {order.isPaid ? (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        ✅ Paid
+                        {order.paidAt && (
+                          <span className="ml-1 text-xs">
+                            {formatFullDateTime(order.paidAt).fullDateTime}
+                          </span>
+                        )}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        ❌ Unpaid
+                      </span>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell>
-                  {order.isDelivered && order.deliveredAt
-                    ? formatDateTime(order.deliveredAt).dateTime
-                    : 'No'}
+                  <div className="flex items-center gap-2">
+                    {order.isDelivered ? (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        ✅ Delivered
+                        {order.deliveredAt && (
+                          <span className="ml-1 text-xs">
+                            {formatFullDateTime(order.deliveredAt).fullDateTime}
+                          </span>
+                        )}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        🚚 In Transit
+                      </span>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell className='flex gap-1'>
                   <Button asChild variant='outline' size='sm'>
                     <Link href={`/admin/orders/${order._id}`}>Details</Link>
                   </Button>
                   <DeleteDialog id={order._id} action={deleteOrder} />
+                  <StatusUpdateButtons order={order} />
                 </TableCell>
               </TableRow>
             ))}

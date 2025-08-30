@@ -1,21 +1,35 @@
+'use client'
+
+import { create } from 'zustand'
 import { usePathname } from 'next/navigation'
-import useDeviceType from './use-device-type'
 import useCartStore from './use-cart-store'
+import useDeviceType from './use-device-type'
 
-const isNotInPaths = (s: string) =>
-  !/^\/$|^\/cart$|^\/checkout$|^\/sign-in$|^\/sign-up$|^\/order(\/.*)?$|^\/account(\/.*)?$|^\/admin(\/.*)?$/.test(
-    s
-  )
-function useCartSidebar() {
-  const {
-    cart: { items },
-  } = useCartStore()
+interface CartSidebarState {
+  isOpen: boolean
+  open: () => void
+  close: () => void
+  toggle: () => void
+}
+
+const useCartSidebar = create<CartSidebarState>((set) => ({
+  isOpen: false,
+  open: () => set({ isOpen: true }),
+  close: () => set({ isOpen: false }),
+  toggle: () => set((state) => ({ isOpen: !state.isOpen })),
+}))
+
+export function useCartSidebarVisibility() {
+  const pathname = usePathname()
   const deviceType = useDeviceType()
-  const currentPath = usePathname()
-
-  return (
-    items.length > 0 && deviceType === 'desktop' && isNotInPaths(currentPath)
-  )
+  const { cart } = useCartStore()
+  
+  // Don't show cart sidebar on these pages
+  const excludedPages = ['/cart', '/checkout', '/sign-in', '/sign-up', '/admin']
+  const isExcludedPage = excludedPages.some(page => pathname.startsWith(page))
+  
+  // Only show on desktop and when not on excluded pages
+  return cart.items.length > 0 && deviceType === 'desktop' && !isExcludedPage
 }
 
 export default useCartSidebar

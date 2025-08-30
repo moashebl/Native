@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
-import { auth } from '../../../auth'
-import { redirect } from 'next/navigation'
 import CheckoutForm from './checkout-form'
+import { auth } from '@/../auth'
+import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
   title: 'Checkout',

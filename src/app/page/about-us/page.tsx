@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   description: 'Learn more about our company, mission, and values.',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default function AboutUsPage() {
   return (
     <div className="container mx-auto py-8 px-4">

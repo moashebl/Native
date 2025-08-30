@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
-import { Resolver, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 
 import { z } from 'zod'
 
@@ -32,16 +32,12 @@ const webPageDefaultValues =
         title: 'Sample Page',
         slug: 'sample-page',
         content: 'Sample Content',
-        isPublished: false,
       }
     : {
         title: '',
         slug: '',
         content: '',
-        isPublished: false,
       }
-
-type FormValues = z.infer<typeof WebPageInputSchema>
 
 const WebPageForm = ({
   type,
@@ -54,25 +50,19 @@ const WebPageForm = ({
 }) => {
   const router = useRouter()
 
-  const form = useForm<FormValues>({
-    resolver: (
-      zodResolver(
-        type === 'Update' ? WebPageUpdateSchema : WebPageInputSchema
-      ) as unknown as Resolver<FormValues>
-    ),
+  const form = useForm<z.infer<typeof WebPageInputSchema>>({
+    resolver:
+      type === 'Update'
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ? (zodResolver(WebPageUpdateSchema) as any)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        : (zodResolver(WebPageInputSchema) as any),
     defaultValues:
-      webPage && type === 'Update'
-        ? {
-            title: webPage.title,
-            slug: webPage.slug,
-            content: webPage.content,
-            isPublished: Boolean(webPage.isPublished),
-          }
-        : webPageDefaultValues,
+      webPage && type === 'Update' ? webPage : webPageDefaultValues,
   })
 
   const { toast } = useToast()
-  async function onSubmit(values: FormValues) {
+  async function onSubmit(values: z.infer<typeof WebPageInputSchema>) {
     if (type === 'Create') {
       const res = await createWebPage(values)
       if (!res.success) {
@@ -108,12 +98,14 @@ const WebPageForm = ({
     <Form {...form}>
       <form
         method='post'
-        onSubmit={form.handleSubmit(onSubmit)}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onSubmit={form.handleSubmit(onSubmit as any)}
         className='space-y-8'
       >
         <div className='flex flex-col gap-5 md:flex-row'>
           <FormField
-            control={form.control}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            control={form.control as any}
             name='title'
             render={({ field }) => (
               <FormItem className='w-full'>
@@ -128,7 +120,8 @@ const WebPageForm = ({
           />
 
           <FormField
-            control={form.control}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            control={form.control as any}
             name='slug'
             render={({ field }) => (
               <FormItem className='w-full'>
@@ -160,14 +153,16 @@ const WebPageForm = ({
         </div>
         <div className='flex flex-col gap-5 md:flex-row'>
           <FormField
-            control={form.control}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            control={form.control as any}
             name='content'
             render={({ field }) => (
               <FormItem className='w-full'>
                 <FormLabel>Content</FormLabel>
                 <FormControl>
                   <MdEditor
-                    value={field.value || ''}
+                    // value={markdown}
+                    {...field}
                     style={{ height: '500px' }}
                     renderHTML={(text) => <ReactMarkdown>{text}</ReactMarkdown>}
                     onChange={({ text }) => form.setValue('content', text)}
@@ -182,13 +177,14 @@ const WebPageForm = ({
         </div>
         <div>
           <FormField
-            control={form.control}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            control={form.control as any}
             name='isPublished'
             render={({ field }) => (
               <FormItem className='space-x-2 items-center'>
                 <FormControl>
                   <Checkbox
-                    checked={!!field.value}
+                    checked={field.value}
                     onCheckedChange={field.onChange}
                   />
                 </FormControl>

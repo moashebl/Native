@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { connectToDatabase } from '@/lib/db'
 import Product, { IProduct } from '@/lib/db/models/product.model'
-import { PAGE_SIZE } from '@/lib/constants'
+import { getSetting } from './setting.actions'
 import { formatError } from '../utils'
 import { ProductInputSchema, ProductUpdateSchema } from '../validator'
 import { IProductInput } from '@/types'
@@ -13,7 +13,10 @@ import { z } from 'zod'
 export async function createProduct(data: IProductInput) {
   try {
     const product = ProductInputSchema.parse(data)
-    await connectToDatabase()
+    const db = await connectToDatabase()
+    if (!db) {
+      return { success: false, message: 'Database connection unavailable' }
+    }
     await Product.create(product)
     revalidatePath('/admin/products')
     return {
@@ -29,7 +32,10 @@ export async function createProduct(data: IProductInput) {
 export async function updateProduct(data: z.infer<typeof ProductUpdateSchema>) {
   try {
     const product = ProductUpdateSchema.parse(data)
-    await connectToDatabase()
+    const db = await connectToDatabase()
+    if (!db) {
+      return { success: false, message: 'Database connection unavailable' }
+    }
     await Product.findByIdAndUpdate(product._id, product)
     revalidatePath('/admin/products')
     return {
@@ -101,17 +107,17 @@ export async function getProductsByTag({
   return JSON.parse(JSON.stringify(products)) as IProduct[]
 }
 // GET ONE PRODUCT BY SLUG
-export async function getProductBySlug(slug: string) {
+export async function getProductBySlug(slug: string): Promise<IProduct | null> {
   await connectToDatabase()
   const product = await Product.findOne({ slug, isPublished: true })
-  if (!product) throw new Error('Product not found')
+  if (!product) return null
   return JSON.parse(JSON.stringify(product)) as IProduct
 }
 // GET RELATED PRODUCTS: PRODUCTS WITH SAME CATEGORY
 export async function getRelatedProductsByCategory({
   category,
   productId,
-  limit = PAGE_SIZE,
+  limit = 4,
   page = 1,
 }: {
   category: string
@@ -119,6 +125,10 @@ export async function getRelatedProductsByCategory({
   limit?: number
   page: number
 }) {
+  const {
+    common: { pageSize },
+  } = await getSetting()
+  limit = limit || pageSize
   await connectToDatabase()
   const skipAmount = (Number(page) - 1) * limit
   const conditions = {
@@ -156,7 +166,10 @@ export async function getAllProducts({
   rating?: string
   sort?: string
 }) {
-  limit = limit || PAGE_SIZE
+  const {
+    common: { pageSize },
+  } = await getSetting()
+  limit = limit || pageSize
   await connectToDatabase()
 
   const queryFilter =
@@ -277,7 +290,10 @@ export async function getAllProductsForAdmin({
 }) {
   await connectToDatabase()
 
-  const pageSize = limit || PAGE_SIZE
+  const {
+    common: { pageSize },
+  } = await getSetting()
+  limit = limit || pageSize
   const queryFilter =
     query && query !== 'all'
       ? {
@@ -302,8 +318,8 @@ export async function getAllProductsForAdmin({
     ...queryFilter,
   })
     .sort(order)
-    .skip(pageSize * (Number(page) - 1))
-    .limit(pageSize)
+    .skip(limit * (Number(page) - 1))
+    .limit(limit)
     .lean()
 
   const countProducts = await Product.countDocuments({
@@ -311,9 +327,9 @@ export async function getAllProductsForAdmin({
   })
   return {
     products: JSON.parse(JSON.stringify(products)) as IProduct[],
-    totalPages: Math.ceil(countProducts / pageSize),
+    totalPages: Math.ceil(countProducts / limit),
     totalProducts: countProducts,
-    from: pageSize * (Number(page) - 1) + 1,
-    to: pageSize * (Number(page) - 1) + products.length,
+    from: limit * (Number(page) - 1) + 1,
+    to: limit * (Number(page) - 1) + products.length,
   }
 }

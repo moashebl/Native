@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 
 function useDeviceType() {
-  const [deviceType, setDeviceType] = useState('unknown')
+  const [deviceType, setDeviceType] = useState<'mobile' | 'desktop' | null>(null)
 
   useEffect(() => {
     const handleResize = () => {
@@ -14,7 +14,8 @@ function useDeviceType() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  return deviceType
+  // Return 'mobile' as default during SSR to prevent hydration mismatch
+  return deviceType ?? 'mobile'
 }
 
 export default useDeviceType

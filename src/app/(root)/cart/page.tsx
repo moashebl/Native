@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import useCartStore from '@/hooks/use-cart-store'
-import { APP_NAME, FREE_SHIPPING_MIN_PRICE } from '@/lib/constants'
+import useSettingStore from '@/hooks/use-setting-store'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -24,6 +24,13 @@ export default function CartPage() {
     removeItem,
   } = useCartStore()
   const router = useRouter()
+  const {
+    setting: {
+      site,
+      common: { freeShippingMinPrice },
+    },
+  } = useSettingStore()
+
   return (
     <div>
       <div className='grid grid-cols-1 md:grid-cols-4  md:gap-4'>
@@ -33,7 +40,8 @@ export default function CartPage() {
               Your Shopping Cart is empty
             </CardHeader>
             <CardContent>
-              Continue shopping on <Link href='/'>{APP_NAME}</Link>
+              Continue shopping on{' '}
+              <Link href='/'>{site.name}</Link>
             </CardContent>
           </Card>
         ) : (
@@ -44,7 +52,9 @@ export default function CartPage() {
                   Shopping Cart
                 </CardHeader>
                 <CardContent className='p-4'>
-                  <div className='flex justify-end border-b mb-4'>Price</div>
+                  <div className='flex justify-end border-b mb-4'>
+                    Price
+                  </div>
 
                   {items.map((item) => (
                     <div
@@ -74,11 +84,17 @@ export default function CartPage() {
                         </Link>
                         <div>
                           <p className='text-sm'>
-                            <span className='font-bold'>Color: </span>{' '}
+                            <span className='font-bold'>
+                              {' '}
+                              Color:{' '}
+                            </span>{' '}
                             {item.color}
                           </p>
                           <p className='text-sm'>
-                            <span className='font-bold'>Size: </span>{' '}
+                            <span className='font-bold'>
+                              {' '}
+                              Size:{' '}
+                            </span>{' '}
                             {item.size}
                           </p>
                         </div>
@@ -147,21 +163,20 @@ export default function CartPage() {
             <div>
               <Card className='rounded-none'>
                 <CardContent className='py-4 space-y-4'>
-                  {itemsPrice < FREE_SHIPPING_MIN_PRICE ? (
+                  {itemsPrice < freeShippingMinPrice ? (
                     <div className='flex-1'>
                       Add{' '}
-                      <span className='text-Violet-700'>
+                      <span className='text-green-700'>
                         <ProductPrice
-                          price={FREE_SHIPPING_MIN_PRICE - itemsPrice}
+                          price={freeShippingMinPrice - itemsPrice}
                           plain
                         />
                       </span>{' '}
-                      of eligible items to your order to qualify for FREE
-                      Shipping
+                      of eligible items to your order to qualify for FREE Shipping
                     </div>
                   ) : (
                     <div className='flex-1'>
-                      <span className='text-Violet-700'>
+                      <span className='text-green-700'>
                         Your order qualifies for FREE Shipping
                       </span>{' '}
                       Choose this option at checkout

@@ -25,6 +25,7 @@ export default function AddToCart({
   const router = useRouter()
 
   const { addItem } = useCartStore()
+  //PROMPT: add quantity state
 
   const [quantity, setQuantity] = useState(1)
 
@@ -35,6 +36,7 @@ export default function AddToCart({
         try {
           addItem(item, 1)
           toast('Added to Cart', {
+            description: 'Added to Cart',
             action: (
               <Button
                 onClick={() => {
@@ -59,7 +61,9 @@ export default function AddToCart({
         onValueChange={(i) => setQuantity(Number(i))}
       >
         <SelectTrigger className=''>
-          <SelectValue>Quantity: {quantity}</SelectValue>
+          <SelectValue>
+            Quantity: {quantity}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent position='popper'>
           {Array.from({ length: item.countInStock }).map((_, i) => (
@@ -86,15 +90,29 @@ export default function AddToCart({
       </Button>
       <Button
         variant='secondary'
-        onClick={() => {
+        onClick={async () => {
           try {
-            addItem(item, quantity)
-            router.push(`/checkout`)
+            // Add item to cart first
+            await addItem(item, quantity)
+            
+            // Show success message
+            toast('Item added to cart', {
+              description: `Added ${quantity} ${item.name} to cart`,
+            })
+            
+            // Force a small delay to ensure cart data is persisted to localStorage
+            await new Promise(resolve => setTimeout(resolve, 200))
+            
+            // Redirect to checkout
+            router.push('/checkout')
           } catch (error: any) {
-            toast(error.message, { style: { background: 'red', color: 'white' } });
+            toast('Error adding item to cart', {
+              description: error.message,
+              style: { background: 'red', color: 'white' }
+            })
           }
         }}
-        className='w-full rounded-full '
+        className='rounded-full w-full'
       >
         Buy Now
       </Button>

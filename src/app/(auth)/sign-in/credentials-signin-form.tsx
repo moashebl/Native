@@ -1,9 +1,11 @@
 'use client'
-import { redirect, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
+import useSettingStore from '@/hooks/use-setting-store'
 import {
   Form,
   FormControl,
@@ -14,13 +16,10 @@ import {
 } from '@/components/ui/form'
 import { useForm } from 'react-hook-form'
 import { IUserSignIn } from '@/types'
-import { signInWithCredentials } from '@/lib/actions/user.actions'
-
-import { toast } from 'sonner'
+import { toast } from '@/hooks/use-toast'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { UserSignInSchema } from '@/lib/validator'
-import { isRedirectError } from 'next/dist/client/components/redirect-error'
-import { APP_NAME } from '@/lib/constants'
+import { signIn } from 'next-auth/react'
 
 const signInDefaultValues =
   process.env.NODE_ENV === 'development'
@@ -34,8 +33,13 @@ const signInDefaultValues =
       }
 
 export default function CredentialsSignInForm() {
+  const {
+    setting: { site },
+  } = useSettingStore()
   const searchParams = useSearchParams()
+  const router = useRouter()
   const callbackUrl = searchParams.get('callbackUrl') || '/'
+  const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm<IUserSignIn>({
     resolver: zodResolver(UserSignInSchema),
@@ -45,17 +49,40 @@ export default function CredentialsSignInForm() {
   const { control, handleSubmit } = form
 
   const onSubmit = async (data: IUserSignIn) => {
+    setIsLoading(true)
     try {
-      await signInWithCredentials({
+      const result = await signIn('credentials', {
         email: data.email,
         password: data.password,
+        redirect: false,
       })
-      redirect(callbackUrl)
-    } catch (error) {
-      if (isRedirectError(error)) {
-        throw error
+
+      if (result?.error) {
+        toast({
+          title: 'Error',
+          description: 'Invalid email or password',
+          variant: 'destructive',
+        })
+      } else if (result?.ok) {
+        toast({
+          title: 'Success',
+          description: 'Signed in successfully',
+        })
+        
+        // Small delay to ensure session is established
+        setTimeout(() => {
+          router.push(callbackUrl)
+          router.refresh()
+        }, 500)
       }
-      toast.error('Invalid email or password')
+    } catch {
+      toast({
+        title: 'Error',
+        description: 'Something went wrong. Please try again.',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -97,10 +124,12 @@ export default function CredentialsSignInForm() {
           />
 
           <div>
-            <Button type='submit'>Sign In</Button>
+            <Button type='submit' disabled={isLoading}>
+              {isLoading ? 'Signing In...' : 'Sign In'}
+            </Button>
           </div>
           <div className='text-sm'>
-            By signing in, you agree to {APP_NAME}&apos;s{' '}
+            By signing in, you agree to {site.name}&apos;s{' '}
             <Link href='/page/conditions-of-use'>Conditions of Use</Link> and{' '}
             <Link href='/page/privacy-policy'>Privacy Notice.</Link>
           </div>

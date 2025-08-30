@@ -117,12 +117,16 @@ export default async function SearchPage(props: {
   })
   return (
     <div>
-      <div className='mb-2 py-2 md:border-b flex-between flex-col md:flex-row '>
-        <div className='flex items-center'>
-          {data.totalProducts === 0
-            ? 'No'
-            : `${data.from}-${data.to} of ${data.totalProducts}`}{' '}
-          results
+      <div className='my-4 bg-card border border-border rounded-lg p-4 flex-between flex-col md:flex-row'>
+        <div className='flex items-center text-muted-foreground mb-2 md:mb-0'>
+          <span className='font-medium'>
+            {data.totalProducts === 0
+              ? 'No'
+              : `${data.from}-${data.to} of ${
+                  data.totalProducts
+                }`}{' '}
+            results
+          </span>
           {(q !== 'all' && q !== '') ||
           (category !== 'all' && category !== '') ||
           (tag !== 'all' && tag !== '') ||
@@ -130,19 +134,38 @@ export default async function SearchPage(props: {
           price !== 'all'
             ? ` for `
             : null}
-          {q !== 'all' && q !== '' && '"' + q + '"'}
-          {category !== 'all' && category !== '' && `  Category: ` + category}
-          {tag !== 'all' && tag !== '' && `   Tag: ` + tag}
-          {price !== 'all' && `    Price: ` + price}
-          {rating !== 'all' && `   Rating: ` + rating + ` & up`}
-          &nbsp;
+          {q !== 'all' && q !== '' && (
+            <span className='text-primary font-medium'>&ldquo;{q}&rdquo;</span>
+          )}
+          {category !== 'all' &&
+            category !== '' && (
+              <span className='ml-2 px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 text-sm rounded-md'>
+                Category: {category}
+              </span>
+            )}
+          {tag !== 'all' &&
+            tag !== '' && (
+              <span className='ml-2 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 text-sm rounded-md'>
+                Tag: {tag}
+              </span>
+            )}
+          {price !== 'all' && (
+            <span className='ml-2 px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 text-sm rounded-md'>
+              Price: {price}
+            </span>
+          )}
+          {rating !== 'all' && (
+            <span className='ml-2 px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 text-sm rounded-md'>
+              Rating: {rating} & Up
+            </span>
+          )}
           {(q !== 'all' && q !== '') ||
           (category !== 'all' && category !== '') ||
           (tag !== 'all' && tag !== '') ||
           rating !== 'all' ||
           price !== 'all' ? (
-            <Button variant={'link'} asChild>
-              <Link href='/search'>Clear</Link>
+            <Button variant={'outline'} size="sm" asChild className='ml-3'>
+              <Link href='/search'>Clear All</Link>
             </Button>
           ) : null}
         </div>
@@ -154,124 +177,148 @@ export default async function SearchPage(props: {
           />
         </div>
       </div>
-      <div className='bg-card grid md:grid-cols-5 md:gap-4'>
+      <div className='bg-muted/30 grid md:grid-cols-5 md:gap-6 p-4'>
         <CollapsibleOnMobile title='Filters'>
-          <div className='space-y-4'>
-            <div>
-              <div className='font-bold'>Department</div>
-              <ul>
-                <li>
-                  <Link
-                    className={`${
-                      ('all' === category || '' === category) && 'text-primary'
-                    }`}
-                    href={getFilterUrl({ category: 'all', params })}
-                  >
-                    All
-                  </Link>
-                </li>
+          <div className='space-y-6 p-4 bg-card border border-border rounded-lg'>
+            <div className='border-b border-border pb-4'>
+              <div className='font-bold text-lg mb-3 text-foreground'>Department</div>
+              <div className='space-y-2'>
+                <Link
+                  className={`block px-3 py-2 rounded-md transition-colors ${
+                    ('all' === category || '' === category) 
+                      ? 'bg-primary text-primary-foreground font-medium' 
+                      : 'hover:bg-muted text-muted-foreground'
+                  }`}
+                  href={getFilterUrl({ category: 'all', params })}
+                >
+                  All
+                </Link>
                 {categories.map((c: string) => (
-                  <li key={c}>
-                    <Link
-                      className={`${c === category && 'text-primary'}`}
-                      href={getFilterUrl({ category: c, params })}
-                    >
-                      {c}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <div className='font-bold'>Price</div>
-              <ul>
-                <li>
                   <Link
-                    className={`${'all' === price && 'text-primary'}`}
-                    href={getFilterUrl({ price: 'all', params })}
-                  >
-                    All
-                  </Link>
-                </li>
-                {prices.map((p) => (
-                  <li key={p.value}>
-                    <Link
-                      href={getFilterUrl({ price: p.value, params })}
-                      className={`${p.value === price && 'text-primary'}`}
-                    >
-                      {p.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <div className='font-bold'>Customer Review</div>
-              <ul>
-                <li>
-                  <Link
-                    href={getFilterUrl({ rating: 'all', params })}
-                    className={`${'all' === rating && 'text-primary'}`}
-                  >
-                    All
-                  </Link>
-                </li>
-
-                <li>
-                  <Link
-                    href={getFilterUrl({ rating: '4', params })}
-                    className={`${'4' === rating && 'text-primary'}`}
-                  >
-                    <div className='flex'>
-                      <Rating size={4} rating={4} /> & Up
-                    </div>
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <div className='font-bold'>Tag</div>
-              <ul>
-                <li>
-                  <Link
-                    className={`${
-                      ('all' === tag || '' === tag) && 'text-primary'
+                    key={c}
+                    className={`block px-3 py-2 rounded-md transition-colors ${
+                      c === category 
+                        ? 'bg-primary text-primary-foreground font-medium' 
+                        : 'hover:bg-muted text-muted-foreground'
                     }`}
-                    href={getFilterUrl({ tag: 'all', params })}
+                    href={getFilterUrl({ category: c, params })}
                   >
-                    All
+                    {c}
                   </Link>
-                </li>
-                {tags.map((t: string) => (
-                  <li key={t}>
-                    <Link
-                      className={`${toSlug(t) === tag && 'text-primary'}`}
-                      href={getFilterUrl({ tag: t, params })}
-                    >
-                      {t}
-                    </Link>
-                  </li>
                 ))}
-              </ul>
+              </div>
+            </div>
+            
+            <div className='border-b border-border pb-4'>
+              <div className='font-bold text-lg mb-3 text-foreground'>Price</div>
+              <div className='space-y-2'>
+                <Link
+                  className={`block px-3 py-2 rounded-md transition-colors ${
+                    'all' === price 
+                      ? 'bg-primary text-primary-foreground font-medium' 
+                      : 'hover:bg-muted text-muted-foreground'
+                  }`}
+                  href={getFilterUrl({ price: 'all', params })}
+                >
+                  All
+                </Link>
+                {prices.map((p) => (
+                  <Link
+                    key={p.value}
+                    href={getFilterUrl({ price: p.value, params })}
+                    className={`block px-3 py-2 rounded-md transition-colors ${
+                      p.value === price 
+                        ? 'bg-primary text-primary-foreground font-medium' 
+                        : 'hover:bg-muted text-muted-foreground'
+                    }`}
+                  >
+                    {p.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+            
+            <div className='border-b border-border pb-4'>
+              <div className='font-bold text-lg mb-3 text-foreground'>Customer Review</div>
+              <div className='space-y-2'>
+                <Link
+                  href={getFilterUrl({ rating: 'all', params })}
+                  className={`block px-3 py-2 rounded-md transition-colors ${
+                    'all' === rating 
+                      ? 'bg-primary text-primary-foreground font-medium' 
+                      : 'hover:bg-muted text-muted-foreground'
+                  }`}
+                >
+                  All
+                </Link>
+                <Link
+                  href={getFilterUrl({ rating: '4', params })}
+                  className={`block px-3 py-2 rounded-md transition-colors ${
+                    '4' === rating 
+                      ? 'bg-primary text-primary-foreground font-medium' 
+                      : 'hover:bg-muted text-muted-foreground'
+                  }`}
+                >
+                  <div className='flex items-center gap-2'>
+                    <Rating size={4} rating={4} />
+                    <span>& Up</span>
+                  </div>
+                </Link>
+              </div>
+            </div>
+            
+            <div>
+              <div className='font-bold text-lg mb-3 text-foreground'>Tag</div>
+              <div className='space-y-2'>
+                <Link
+                  className={`block px-3 py-2 rounded-md transition-colors ${
+                    ('all' === tag || '' === tag)
+                      ? 'bg-primary text-primary-foreground font-medium' 
+                      : 'hover:bg-muted text-muted-foreground'
+                  }`}
+                  href={getFilterUrl({ tag: 'all', params })}
+                >
+                  All
+                </Link>
+                {tags.map((t: string) => (
+                  <Link
+                    key={t}
+                    className={`block px-3 py-2 rounded-md transition-colors ${
+                      toSlug(t) === tag 
+                        ? 'bg-primary text-primary-foreground font-medium' 
+                        : 'hover:bg-muted text-muted-foreground'
+                    }`}
+                    href={getFilterUrl({ tag: t, params })}
+                  >
+                    {t}
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
         </CollapsibleOnMobile>
 
         <div className='md:col-span-4 space-y-4'>
-          <div>
-            <div className='font-bold text-xl'>Results</div>
-            <div>Check each product page for other buying options</div>
+          <div className='bg-card border border-border rounded-lg p-4'>
+            <div className='font-bold text-xl text-foreground mb-2'>Results</div>
+            <div className='text-muted-foreground text-sm'>
+              Check each product page for other buying options
+            </div>
           </div>
 
-          <div className='grid grid-cols-1 gap-4 md:grid-cols-2  lg:grid-cols-3  '>
-            {data.products.length === 0 && <div>No product found</div>}
+          <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
+            {data.products.length === 0 && (
+              <div className='text-center py-12'>
+                <div className='text-gray-500 text-lg mb-2'>No products found</div>
+                <div className='text-gray-400 text-sm'>Try adjusting your search criteria or filters</div>
+              </div>
+            )}
             {data.products.map((product: IProduct) => (
               <ProductCard key={product._id} product={product} />
             ))}
           </div>
           {data.totalPages > 1 && (
             <Pagination page={page} totalPages={data.totalPages} />
-
           )}
         </div>
       </div>
