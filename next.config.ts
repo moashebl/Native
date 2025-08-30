@@ -1,8 +1,6 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  // Optimize for Vercel deployment
-  output: 'standalone',
   // Disable experimental features that can cause issues
   experimental: {
     // Disable server actions if not needed
@@ -10,6 +8,8 @@ const nextConfig: NextConfig = {
       allowedOrigins: [],
     },
   },
+  // Disable build traces that cause Vercel issues
+  generateBuildId: () => 'build',
   
   images: {
     remotePatterns: [
