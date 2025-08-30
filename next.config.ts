@@ -3,10 +3,6 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   // Optimize for Vercel deployment
   output: 'standalone',
-  // Disable build traces that cause Vercel issues
-  generateBuildId: async () => {
-    return 'build-' + Date.now()
-  },
   // Disable experimental features that can cause issues
   experimental: {
     // Disable server actions if not needed
