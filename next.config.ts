@@ -1,7 +1,21 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-    images: {
+  // Optimize for Vercel deployment
+  output: 'standalone',
+  // Disable build traces that cause Vercel issues
+  generateBuildId: async () => {
+    return 'build-' + Date.now()
+  },
+  // Disable experimental features that can cause issues
+  experimental: {
+    // Disable server actions if not needed
+    serverActions: {
+      allowedOrigins: [],
+    },
+  },
+  
+  images: {
     remotePatterns: [
       {
         protocol: 'https',
