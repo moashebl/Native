@@ -43,13 +43,13 @@ export default function Header() {
   }, [])
   
   return (
-    <header className='bg-background border-b border-border text-foreground'>
+    <header className='bg-background border-b border-border text-foreground sticky top-0 z-50'>
       <div className='px-2'>
-        <div className='flex items-center justify-between'>
+        <div className='flex items-center justify-between py-0 md:py-1 relative z-10'>
           <div className='flex items-center'>
             <Link
               href='/'
-              className='flex items-center header-button m-1'
+              className='flex items-center header-button m-0 md:m-1'
             >
               <Image
                 src='/icons/logo.svg'
@@ -71,19 +71,21 @@ export default function Header() {
           </nav>
           <MobileMenu />
         </div>
-        <div className='md:hidden block py-2'>
+        <div className='md:hidden block py-0'>
           <Search />
         </div>
       </div>
-      <div className='flex items-center px-3 mb-[1px] bg-muted/50 border-b border-border'>
-        <Sidebar categories={categories} />
+      <div className='flex items-center px-1 md:px-2 mb-[1px] bg-muted/50 border-b border-border relative z-10'>
+        <div className='relative z-20'>
+          <Sidebar categories={categories} />
+        </div>
 
-        <div className='flex items-center flex-wrap gap-3 overflow-hidden max-h-[42px]'>
+        <div className='flex items-center flex-wrap gap-1 md:gap-2.5 overflow-hidden max-h-[28px] md:max-h-[36px]'>
           {data.headerMenus.map((menu) => (
             <Link
               href={menu.href}
               key={menu.href}
-              className='header-button !p-2'
+              className='header-button !p-1 md:!p-1.5'
             >
               {menu.name}
             </Link>
@@ -92,7 +94,7 @@ export default function Header() {
             const href = `/page/${page.slug}`
             if (existingHrefs.has(href)) return null
             return (
-              <Link href={href} key={href} className='header-button !p-2'>
+              <Link href={href} key={href} className='header-button !p-1 md:!p-1.5'>
                 {page.title}
               </Link>
             )

@@ -148,11 +148,11 @@ export default function Footer() {
   )
 
   return (
-    <footer className='bg-background border-t border-border text-foreground'>
+    <footer className='bg-background border-t border-border text-foreground relative z-10'>
       <div className='w-full'>
         <Button
           variant='ghost'
-          className='bg-muted/50 w-full rounded-none hover:bg-muted'
+          className='bg-muted/50 w-full rounded-none hover:bg-muted relative z-10'
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         >
           <ChevronUp className='mr-2 h-4 w-4' />

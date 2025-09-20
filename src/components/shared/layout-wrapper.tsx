@@ -13,12 +13,12 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   const isAdminPage = pathname.startsWith('/admin')
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       {!isAdminPage && <Header />}
-      <main className="flex-1">
+      <main className="flex-1 relative z-0">
         {children}
       </main>
       {!isAdminPage && <Footer />}
-    </>
+    </div>
   )
 }

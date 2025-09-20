@@ -6,14 +6,13 @@ import { X, ChevronRight, UserCircle, MenuIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useSession, signOut } from 'next-auth/react'
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/components/ui/drawer'
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
 import { useRouter } from 'next/navigation'
 import { toast } from '@/hooks/use-toast'
 
@@ -26,9 +25,29 @@ export default function Sidebar({
   const isAuthenticated = status === 'authenticated'
   const isLoading = status === 'loading'
   const router = useRouter()
+  const [open, setOpen] = React.useState(false)
+  
+  // Debug logging
+  React.useEffect(() => {
+    console.log('Sidebar open state:', open)
+  }, [open])
+  
+  const navigateAndClose = (href: string) => (e: React.MouseEvent) => {
+    e.preventDefault()
+    console.log('Navigating to:', href)
+    setOpen(false)
+    // Navigate after closing; slight delay ensures drawer starts closing animation
+    setTimeout(() => {
+      router.push(href)
+      router.refresh()
+    }, 100)
+  }
 
   const handleSignOut = async () => {
     try {
+      // Close the drawer immediately on tap
+      setOpen(false)
+
       await signOut({ 
         redirect: false,
         callbackUrl: '/'
@@ -39,10 +58,8 @@ export default function Sidebar({
         description: 'Signed out successfully',
       })
       
-      // Force router refresh to update all components
+      // Refresh and redirect after sign-out
       router.refresh()
-      
-      // Optional: Redirect to home page
       router.push('/')
     } catch {
       toast({
@@ -54,48 +71,55 @@ export default function Sidebar({
   }
 
   return (
-    <Drawer direction='left'>
-      <DrawerTrigger className='header-button flex items-center !p-2  '>
-        <MenuIcon className='h-5 w-5 mr-1' />
-        All
-      </DrawerTrigger>
-      <DrawerContent className='w-[350px] mt-0 top-0'>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <button 
+          className='header-button flex items-center !p-1.5 md:!p-2'
+          onClick={() => {
+            console.log('Sidebar trigger clicked')
+            setOpen(true)
+          }}
+        >
+          <MenuIcon className='h-5 w-5 mr-1' />
+          All
+        </button>
+      </SheetTrigger>
+      <SheetContent side='left' className='w-[350px] sm:w-[400px]'>
         <div className='flex flex-col h-full'>
           {/* User Sign In Section */}
-          <div className='dark bg-gray-800 text-foreground flex items-center justify-between  '>
-            <DrawerHeader>
-              <DrawerTitle className='flex items-center'>
+          <div className='dark bg-gray-800 text-foreground flex items-center justify-between'>
+            <SheetHeader>
+              <SheetTitle className='flex items-center'>
                 <UserCircle className='h-6 w-6 mr-2' />
                 {isLoading ? (
                   <span className='text-lg font-semibold'>
                     Loading...
                   </span>
                 ) : isAuthenticated ? (
-                  <DrawerClose asChild>
-                    <Link href='/account'>
-                      <span className='text-lg font-semibold'>
-                        Hello, {session?.user?.name || 'User'}
-                      </span>
-                    </Link>
-                  </DrawerClose>
+                  <Link href='/account' onClick={navigateAndClose('/account')}>
+                    <span className='text-lg font-semibold'>
+                      Hello, {session?.user?.name || 'User'}
+                    </span>
+                  </Link>
                 ) : (
-                  <DrawerClose asChild>
-                    <Link href='/sign-in'>
-                      <span className='text-lg font-semibold'>
-                        Hello, sign in
-                      </span>
-                    </Link>
-                  </DrawerClose>
+                  <Link href='/sign-in' onClick={navigateAndClose('/sign-in')}>
+                    <span className='text-lg font-semibold'>
+                      Hello, sign in
+                    </span>
+                  </Link>
                 )}
-              </DrawerTitle>
-              <DrawerDescription></DrawerDescription>
-            </DrawerHeader>
-            <DrawerClose asChild>
-              <Button variant='ghost' size='icon' className='mr-2'>
-                <X className='h-5 w-5' />
-                <span className='sr-only'>Close</span>
-              </Button>
-            </DrawerClose>
+              </SheetTitle>
+              <SheetDescription></SheetDescription>
+            </SheetHeader>
+            <Button 
+              variant='ghost' 
+              size='icon' 
+              className='mr-2'
+              onClick={() => setOpen(false)}
+            >
+              <X className='h-5 w-5' />
+              <span className='sr-only'>Close</span>
+            </Button>
           </div>
 
           {/* Shop By Category */}
@@ -107,15 +131,15 @@ export default function Sidebar({
             </div>
             <nav className='flex flex-col'>
               {categories.map((category) => (
-                <DrawerClose asChild key={category}>
-                  <Link
-                    href={`/search?category=${category}`}
-                    className={`flex items-center justify-between item-button`}
-                  >
+                <Link
+                  key={category}
+                  href={`/search?category=${category}`}
+                  className={`flex items-center justify-between item-button`}
+                  onClick={navigateAndClose(`/search?category=${encodeURIComponent(category)}`)}
+                >
                     <span>{category}</span>
                     <ChevronRight className='h-4 w-4' />
-                  </Link>
-                </DrawerClose>
+                </Link>
               ))}
             </nav>
           </div>
@@ -127,16 +151,13 @@ export default function Sidebar({
                 Help & Settings
               </h2>
             </div>
-            <DrawerClose asChild>
-              <Link href='/account' className='item-button'>
+            <Link href='/account' className='item-button' onClick={navigateAndClose('/account')}>
                 Your account
               </Link>
-            </DrawerClose>{' '}
-            <DrawerClose asChild>
-              <Link href='/page/customer-service' className='item-button'>
+            {' '}
+            <Link href='/page/customer-service' className='item-button' onClick={navigateAndClose('/page/customer-service')}>
                 Customer Service
               </Link>
-            </DrawerClose>
             {isLoading ? (
               <div className='item-button text-base text-muted-foreground'>
                 Loading...
@@ -150,13 +171,18 @@ export default function Sidebar({
                 Sign out
               </Button>
             ) : (
-              <Link href='/sign-in' className='item-button'>
-                Sign in
-              </Link>
+              <>
+                <Link href='/sign-in' className='item-button' onClick={navigateAndClose('/sign-in')}>
+                  Sign in
+                </Link>
+                <Link href='/sign-up' className='item-button' onClick={navigateAndClose('/sign-up')}>
+                  Sign up
+                </Link>
+              </>
             )}
           </div>
         </div>
-      </DrawerContent>
-    </Drawer>
+      </SheetContent>
+    </Sheet>
   )
 }

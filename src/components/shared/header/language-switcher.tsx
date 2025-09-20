@@ -33,7 +33,7 @@ export default function LanguageSwitcher() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className='header-button h-[41px]'>
+      <DropdownMenuTrigger className='header-button h-[34px] md:h-[41px]'>
         <div className='flex items-center gap-1'>
           <span className='text-xl'>
             {languages.find((l) => l.code === locale)?.icon}
@@ -42,7 +42,7 @@ export default function LanguageSwitcher() {
           <ChevronDownIcon />
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className='w-56'>
+      <DropdownMenuContent className='w-56 z-[60]' sideOffset={6}>
         <DropdownMenuLabel>Language</DropdownMenuLabel>
         <DropdownMenuRadioGroup value={locale} onValueChange={handleLanguageChange}>
           {languages.map((lang) => (
