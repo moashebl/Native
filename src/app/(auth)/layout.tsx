@@ -6,7 +6,7 @@ export default async function AuthLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { site } = await getSetting()
+  await getSetting()
   return (
     <div className='flex flex-col items-center min-h-screen highlight-link relative z-0'>
       <main className='mx-auto max-w-sm min-w-80 p-4 relative z-0'>{children}</main>
