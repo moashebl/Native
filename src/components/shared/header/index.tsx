@@ -76,7 +76,7 @@ export default function Header() {
         </div>
       </div>
       <div className='flex items-center px-1 md:px-2 mb-[1px] bg-muted/50 border-b border-border relative z-10'>
-        <div className='relative z-20'>
+        <div className='relative z-20 flex items-center'>
           <Sidebar categories={categories} />
         </div>
 

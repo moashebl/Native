@@ -11,7 +11,6 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from '@/components/ui/sheet'
 import { useRouter } from 'next/navigation'
 import { toast } from '@/hooks/use-toast'
@@ -27,9 +26,21 @@ export default function Sidebar({
   const router = useRouter()
   const [open, setOpen] = React.useState(false)
   
-  // Debug logging
+  // Enhanced debug logging
   React.useEffect(() => {
     console.log('Sidebar open state:', open)
+    
+    // Add event listener to debug click events on mobile
+    const handleDocumentClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      console.log('Document clicked:', target.tagName, target.className)
+    }
+    
+    document.addEventListener('click', handleDocumentClick)
+    
+    return () => {
+      document.removeEventListener('click', handleDocumentClick)
+    }
   }, [open])
   
   const navigateAndClose = (href: string) => (e: React.MouseEvent) => {
@@ -71,20 +82,26 @@ export default function Sidebar({
   }
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <button 
-          className='header-button flex items-center !p-1.5 md:!p-2'
-          onClick={() => {
-            console.log('Sidebar trigger clicked')
-            setOpen(true)
-          }}
-        >
-          <MenuIcon className='h-5 w-5 mr-1' />
-          All
-        </button>
-      </SheetTrigger>
-      <SheetContent side='left' className='w-[350px] sm:w-[400px]'>
+    <>
+      <button 
+        className='sidebar-button z-50 touch-manipulation'
+        onClick={(e) => {
+          e.stopPropagation()
+          e.preventDefault()
+          console.log('Sidebar trigger clicked')
+          setOpen(true)
+        }}
+        style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
+      >
+        <MenuIcon className='h-6 w-6 mr-1' />
+        All
+      </button>
+      
+      <Sheet open={open} onOpenChange={(value) => {
+        console.log('Sheet onOpenChange called with value:', value)
+        setOpen(value)
+      }} modal={true}>
+      <SheetContent side='left' className='w-[300px] sm:w-[400px] z-[100] fixed inset-y-0 left-0'>
         <div className='flex flex-col h-full'>
           {/* User Sign In Section */}
           <div className='dark bg-gray-800 text-foreground flex items-center justify-between'>
@@ -184,5 +201,6 @@ export default function Sidebar({
         </div>
       </SheetContent>
     </Sheet>
+    </>
   )
 }

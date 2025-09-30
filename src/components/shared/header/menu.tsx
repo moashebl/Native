@@ -27,7 +27,7 @@ export default function MobileMenu() {
   }, [pathname, open])
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet open={open} onOpenChange={setOpen} modal={true}>
       <SheetTrigger asChild>
         <Button 
           variant='ghost' 
@@ -41,7 +41,7 @@ export default function MobileMenu() {
       </SheetTrigger>
       <SheetContent
         side='left'
-        className='w-[300px] sm:w-[400px] z-[70]'
+        className='w-[300px] sm:w-[400px] z-[90]'
         onClick={(e) => {
           const anchor = (e.target as HTMLElement).closest('a') as HTMLAnchorElement | null
           if (anchor && (anchor.href.includes('/sign-in') || anchor.href.includes('/sign-up') || anchor.href.includes('/account'))) {
