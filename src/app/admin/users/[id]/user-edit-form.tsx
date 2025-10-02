@@ -23,13 +23,16 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
-import { updateUser } from '@/lib/actions/user.actions'
-import { USER_ROLES } from '@/lib/constants'
+import { updateUser, getUserAvailableRoles } from '@/lib/actions/user.actions'
 import { IUser } from '@/lib/db/models/user.model'
 import { UserUpdateSchema } from '@/lib/validator'
+import { isMainAdmin } from '@/lib/role-utils'
+import { useEffect, useState } from 'react'
 
 const UserEditForm = ({ user }: { user: IUser }) => {
   const router = useRouter()
+  const [availableRoles, setAvailableRoles] = useState<string[]>([])
+  const [isMainAdminUser, setIsMainAdminUser] = useState(false)
 
   const form = useForm<z.infer<typeof UserUpdateSchema>>({
     resolver: zodResolver(UserUpdateSchema),
@@ -37,6 +40,14 @@ const UserEditForm = ({ user }: { user: IUser }) => {
   })
 
   const { toast } = useToast()
+
+  useEffect(() => {
+    // Check if this user is the main admin
+    setIsMainAdminUser(isMainAdmin(user.email))
+    
+    // Get available roles for the current session user
+    getUserAvailableRoles().then(setAvailableRoles)
+  }, [user.email])
   async function onSubmit(values: z.infer<typeof UserUpdateSchema>) {
     try {
       const res = await updateUser({
@@ -115,11 +126,19 @@ const UserEditForm = ({ user }: { user: IUser }) => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {USER_ROLES.map((role) => (
-                      <SelectItem key={role} value={role}>
-                        {role}
+                    {isMainAdminUser ? (
+                      // Main admin can only be Admin - show locked state
+                      <SelectItem value="Admin" disabled>
+                        Admin (Main Admin - Cannot be changed)
                       </SelectItem>
-                    ))}
+                    ) : (
+                      // Show available roles for other users
+                      availableRoles.map((role: string) => (
+                        <SelectItem key={role} value={role}>
+                          {role}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
 

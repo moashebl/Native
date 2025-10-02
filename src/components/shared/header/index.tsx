@@ -34,8 +34,8 @@ export default function Header() {
         setCategories(fetchedCategories)
       } catch (error) {
         console.error('Error fetching categories:', error)
-        // Fallback to some default categories if fetch fails
-        setCategories(['T-Shirts', 'Jeans', 'Shoes', 'Watches', 'Electronics', 'Home'])
+        // Set empty array if fetch fails - only show actual categories
+        setCategories([])
       }
     }
     
@@ -43,25 +43,25 @@ export default function Header() {
   }, [])
   
   return (
-    <header className='bg-background border-b border-border text-foreground sticky top-0 z-50'>
-      <div className='px-2'>
-        <div className='flex items-center justify-between py-0 md:py-1 relative z-10'>
+    <header className='bg-background border-b border-border text-foreground shadow-sm'>
+      <div className='px-4 py-2'>
+        <div className='flex items-center justify-between relative z-10'>
           <div className='flex items-center'>
             <Link
               href='/'
-              className='flex items-center header-button m-0 md:m-1'
+              className='flex items-center m-0 p-0'
             >
               <Image
                 src='/icons/logo.svg'
-                width={64}
-                height={64}
+                width={90}
+                height={90}
                 alt='Native House logo'
                 className='filter brightness-100 transition-all duration-300'
               />
             </Link>
           </div>
           <div className='hidden md:block flex-1 max-w-xl'>
-            <Search />
+            <Search categories={categories} />
           </div>
           <nav className='md:flex gap-3 hidden items-center'>
             <LanguageSwitcher />
@@ -71,21 +71,21 @@ export default function Header() {
           </nav>
           <MobileMenu />
         </div>
-        <div className='md:hidden block py-0'>
-          <Search />
+        <div className='md:hidden block py-3'>
+          <Search categories={categories} />
         </div>
       </div>
-      <div className='flex items-center px-1 md:px-2 mb-[1px] bg-muted/50 border-b border-border relative z-30'>
+      <div className='flex items-center px-4 py-2 bg-muted/30 border-t border-border/50 relative z-30'>
         <div className='relative z-40 flex items-center'>
           <Sidebar categories={categories} />
         </div>
 
-        <div className='flex items-center flex-wrap gap-1 md:gap-2.5 overflow-hidden max-h-[28px] md:max-h-[36px]'>
+        <div className='flex items-center gap-1 md:gap-2 overflow-x-auto scrollbar-hide'>
           {data.headerMenus.map((menu) => (
             <Link
               href={menu.href}
               key={menu.href}
-              className='header-button !p-1 md:!p-1.5'
+              className='header-button !py-1 !px-2 md:!py-1.5 md:!px-3 text-sm font-medium hover:bg-background/80 rounded-md transition-colors whitespace-nowrap flex-shrink-0'
             >
               {menu.name}
             </Link>
@@ -94,7 +94,7 @@ export default function Header() {
             const href = `/page/${page.slug}`
             if (existingHrefs.has(href)) return null
             return (
-              <Link href={href} key={href} className='header-button !p-1 md:!p-1.5'>
+              <Link href={href} key={href} className='header-button !py-1 !px-2 md:!py-1.5 md:!px-3 text-sm font-medium hover:bg-background/80 rounded-md transition-colors whitespace-nowrap flex-shrink-0'>
                 {page.title}
               </Link>
             )

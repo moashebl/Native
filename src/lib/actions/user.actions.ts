@@ -9,6 +9,8 @@ import { formatError } from '../utils'
 import { revalidatePath } from 'next/cache'
 import { getSetting } from './setting.actions'
 import { z } from 'zod'
+import { canModifyUser, canDeleteUser, getAvailableRoles } from '../role-server-utils'
+import { isMainAdmin } from '../role-utils'
 
 // CREATE
 export async function registerUser(userSignUp: IUserSignUp) {
@@ -151,8 +153,21 @@ export async function isGoogleUser() {
 export async function deleteUser(id: string) {
   try {
     await connectToDatabase()
-    const res = await User.findByIdAndDelete(id)
-    if (!res) throw new Error('Use not found')
+    const userToDelete = await User.findById(id)
+    if (!userToDelete) throw new Error('User not found')
+    
+    // Check if current user can delete this user
+    const canDelete = await canDeleteUser(userToDelete.email)
+    if (!canDelete) {
+      throw new Error('You do not have permission to delete this user')
+    }
+    
+    // Prevent deleting the main admin
+    if (isMainAdmin(userToDelete.email)) {
+      throw new Error('Cannot delete the main admin')
+    }
+    
+    await User.findByIdAndDelete(id)
     revalidatePath('/admin/users')
     return {
       success: true,
@@ -193,6 +208,18 @@ export async function updateUser(user: z.infer<typeof UserUpdateSchema>) {
     await connectToDatabase()
     const dbUser = await User.findById(user._id)
     if (!dbUser) throw new Error('User not found')
+    
+    // Check if current user can modify this user
+    const canModify = await canModifyUser(dbUser.email)
+    if (!canModify) {
+      throw new Error('You do not have permission to modify this user')
+    }
+    
+    // Prevent demoting the main admin
+    if (isMainAdmin(dbUser.email) && user.role !== 'Admin') {
+      throw new Error('Cannot change the main admin role')
+    }
+    
     dbUser.name = user.name
     dbUser.email = user.email
     dbUser.role = user.role
@@ -305,4 +332,9 @@ export async function resendVerificationEmail(userEmail: string) {
     console.error('💥 Error in resendVerificationEmail:', error)
     return { success: false, message: formatError(error) }
   }
+}
+
+// Role management server actions
+export async function getUserAvailableRoles() {
+  return await getAvailableRoles()
 }

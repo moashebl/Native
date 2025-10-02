@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import Link from 'next/link'
-import { X, ChevronRight, UserCircle, MenuIcon } from 'lucide-react'
+import { ChevronRight, UserCircle, MenuIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useSession, signOut } from 'next-auth/react'
 import {
@@ -83,7 +83,7 @@ export default function Sidebar({
       <SheetContent side='left' className='w-[300px] sm:w-[400px] z-[100] fixed inset-y-0 left-0'>
         <div className='flex flex-col h-full'>
           {/* User Sign In Section */}
-          <div className='dark bg-gray-800 text-foreground flex items-center justify-between'>
+          <div className='dark bg-gray-800 text-foreground'>
             <SheetHeader>
               <SheetTitle className='flex items-center'>
                 <UserCircle className='h-6 w-6 mr-2' />
@@ -107,15 +107,6 @@ export default function Sidebar({
               </SheetTitle>
               <SheetDescription></SheetDescription>
             </SheetHeader>
-            <Button 
-              variant='ghost' 
-              size='icon' 
-              className='mr-2'
-              onClick={() => setOpen(false)}
-            >
-              <X className='h-5 w-5' />
-              <span className='sr-only'>Close</span>
-            </Button>
           </div>
 
           {/* Shop By Category */}

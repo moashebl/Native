@@ -49,6 +49,7 @@ export const FREE_SHIPPING_MIN_PRICE = Number(
     },
   ]
   export const USER_ROLES = ['Admin', 'User']
+  export const MAIN_ADMIN_EMAIL = 'mohamed.alaashebl5@gmail.com'
 
 export const COLORS = ['Gold', 'Violet', 'Red']
 export const THEMES = ['Light', 'Dark', 'System']
