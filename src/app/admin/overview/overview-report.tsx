@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { calculatePastDate, formatDateTime, formatNumber } from '@/lib/utils'
+import { formatDateTime, formatNumber } from '@/lib/utils'
 
 import SalesCategoryPieChart from './sales-category-pie-chart'
 
@@ -32,8 +32,15 @@ import { Skeleton } from '@/components/ui/skeleton'
 import TableChart from './table-chart'
 
 export default function OverviewReport() {
+  // Calculate 6 months ago from today
+  const getSixMonthsAgo = () => {
+    const today = new Date()
+    const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 6, today.getDate())
+    return sixMonthsAgo
+  }
+
   const [date, setDate] = useState<DateRange | undefined>({
-    from: calculatePastDate(30),
+    from: getSixMonthsAgo(),
     to: new Date(),
   })
 

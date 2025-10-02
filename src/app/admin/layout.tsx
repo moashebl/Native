@@ -34,7 +34,7 @@ export default async function AdminLayout({
                 width={48}
                 height={48}
                 alt={`${siteName} logo`}
-                className='filter brightness-0 invert hover:brightness-100 hover:invert-0 transition-all duration-300'
+                className=''
               />
             </Link>
             <AdminNav className='mx-6 hidden md:flex' />

@@ -79,7 +79,7 @@ export default function UserButton() {
           </div>
         </DropdownMenuTrigger>
         {session ? (
-          <DropdownMenuContent className='w-56 z-[60]' align='end' forceMount sideOffset={6}>
+          <DropdownMenuContent className='w-56 z-[500]' align='end' forceMount sideOffset={6}>
             <DropdownMenuLabel className='font-normal'>
               <div className='flex flex-col space-y-1'>
                 <p className='text-sm font-medium leading-none'>
@@ -115,7 +115,7 @@ export default function UserButton() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         ) : (
-          <DropdownMenuContent className='w-56 z-[60]' align='end' forceMount sideOffset={6}>
+          <DropdownMenuContent className='w-56 z-[500]' align='end' forceMount sideOffset={6}>
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <Link

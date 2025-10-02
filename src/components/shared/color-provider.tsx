@@ -23,7 +23,7 @@ export function ColorProvider({
   React.useEffect(() => {
     if (theme && color) {
       console.log('ColorProvider: theme =', theme, 'color =', color.name)
-      updateCssVariables()
+      updateCssVariables(theme as string)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [theme, color, storeState])

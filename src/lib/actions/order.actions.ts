@@ -18,7 +18,6 @@ import Product from '../db/models/product.model'
 import User from '../db/models/user.model'
 import mongoose from 'mongoose'
 
-// GET ORDERS BY USER
 export async function getOrderSummary(date: DateRange) {
   await connectToDatabase()
 

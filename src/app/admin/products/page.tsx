@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import ProductList from './product-list'
-import { getAllProductsForAdmin } from '@/lib/actions/product.actions'
+import { getAllProductsForAdmin, deleteProduct } from '@/lib/actions/product.actions'
 import { IProductInput } from '@/types'
+import { toast } from '@/hooks/use-toast'
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 
 interface Product extends IProductInput {
   _id: string
@@ -15,6 +17,15 @@ interface Product extends IProductInput {
 export default function AdminProduct() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean
+    productId: string
+    productName: string
+  }>({
+    open: false,
+    productId: '',
+    productName: ''
+  })
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -46,7 +57,48 @@ export default function AdminProduct() {
   }, [])
 
   const handleDelete = (id: string) => {
-    console.log('Deleting product:', id)
+    // Find the product name for the confirmation dialog
+    const product = products.find(p => p._id === id)
+    const productName = product?.name || 'this product'
+    
+    setDeleteDialog({
+      open: true,
+      productId: id,
+      productName: productName
+    })
+  }
+
+  const confirmDelete = async () => {
+    const { productId, productName } = deleteDialog
+    
+    try {
+      const result = await deleteProduct(productId)
+      
+      if (result.success) {
+        // Remove the product from the local state
+        setProducts(prevProducts => prevProducts.filter(product => product._id !== productId))
+        
+        toast({
+          title: 'Product Deleted Successfully',
+          description: `"${productName}" has been permanently removed from your catalog.`,
+        })
+      } else {
+        toast({
+          title: 'Failed to Delete Product',
+          description: result.message || 'An error occurred while deleting the product.',
+          variant: 'destructive',
+        })
+      }
+    } catch (error) {
+      console.error('Error deleting product:', error)
+      toast({
+        title: 'Delete Operation Failed',
+        description: 'Unable to delete the product. Please check your connection and try again.',
+        variant: 'destructive',
+      })
+    } finally {
+      setDeleteDialog({ open: false, productId: '', productName: '' })
+    }
   }
 
   if (loading) {
@@ -57,5 +109,19 @@ export default function AdminProduct() {
     )
   }
 
-  return <ProductList products={products} onDelete={handleDelete} />
+  return (
+    <>
+      <ProductList products={products} onDelete={handleDelete} />
+      <ConfirmationDialog
+        open={deleteDialog.open}
+        onOpenChange={(open) => setDeleteDialog(prev => ({ ...prev, open }))}
+        title="Delete Product"
+        description={`Are you sure you want to permanently delete "${deleteDialog.productName}"? This action cannot be undone and will remove the product from your catalog.`}
+        confirmText="Yes, Delete"
+        cancelText="Cancel"
+        variant="destructive"
+        onConfirm={confirmDelete}
+      />
+    </>
+  )
 }

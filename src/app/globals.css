@@ -82,37 +82,38 @@
 }
 
 .dark {
-  --background: oklch(0.141 0.005 285.823);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.21 0.006 285.885);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.21 0.006 285.885);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.795 0.184 86.047);
-  --primary-foreground: oklch(0.421 0.095 57.708);
-  --secondary: oklch(0.274 0.006 286.033);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.274 0.006 286.033);
-  --muted-foreground: oklch(0.705 0.015 286.067);
-  --accent: oklch(0.274 0.006 286.033);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.554 0.135 66.442);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.21 0.006 285.885);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.795 0.184 86.047);
-  --sidebar-primary-foreground: oklch(0.421 0.095 57.708);
-  --sidebar-accent: oklch(0.274 0.006 286.033);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.554 0.135 66.442);
+  --background: hsl(222, 84%, 4.9%);
+  --foreground: hsl(210, 40%, 98%);
+  --card: hsl(222, 84%, 6.5%);
+  --card-foreground: hsl(210, 40%, 98%);
+  --popover: hsl(222, 84%, 6.5%);
+  --popover-foreground: hsl(210, 40%, 98%);
+  --primary: hsl(47, 96%, 53%);
+  --primary-foreground: hsl(222, 84%, 4.9%);
+  --secondary: hsl(217, 32%, 17%);
+  --secondary-foreground: hsl(210, 40%, 98%);
+  --muted: hsl(217, 32%, 17%);
+  --muted-foreground: hsl(215, 20%, 65%);
+  --accent: hsl(217, 32%, 17%);
+  --accent-foreground: hsl(210, 40%, 98%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(210, 40%, 98%);
+  --border: hsl(217, 32%, 17%);
+  --input: hsl(217, 32%, 17%);
+  --ring: hsl(47, 96%, 53%);
+  --chart-1: hsl(220, 70%, 50%);
+  --chart-2: hsl(160, 60%, 45%);
+  --chart-3: hsl(30, 80%, 55%);
+  --chart-4: hsl(280, 65%, 60%);
+  --chart-5: hsl(340, 75%, 55%);
+  --sidebar: hsl(222, 84%, 4.9%);
+  --sidebar-foreground: hsl(210, 40%, 98%);
+  --sidebar-primary: hsl(47, 96%, 53%);
+  --sidebar-primary-foreground: hsl(222, 84%, 4.9%);
+  --sidebar-accent: hsl(217, 32%, 17%);
+  --sidebar-accent-foreground: hsl(210, 40%, 98%);
+  --sidebar-border: hsl(217, 32%, 17%);
+  --sidebar-ring: hsl(47, 96%, 53%);
 }
 
 .responsive-cover-img {
@@ -143,17 +144,38 @@
 @layer utilities {
   .highlight-link a,
   a.highlight-link {
-    @apply text-sky-700  hover:text-orange-700 hover:underline;
+    @apply text-sky-700 hover:text-orange-700 hover:underline;
   }
+  
+  .dark .highlight-link a,
+  .dark a.highlight-link {
+    @apply text-blue-400 hover:text-yellow-400 hover:underline;
+  }
+  
   .header-button {
-    @apply cursor-pointer p-1 border border-transparent hover:border-foreground rounded-[2px];
+    @apply cursor-pointer p-1 border border-transparent hover:border-foreground rounded-[2px] transition-all duration-200;
   }
+  
+  .dark .header-button {
+    @apply hover:bg-secondary/50;
+  }
+  
   .sidebar-button {
-    @apply cursor-pointer p-2 md:p-3 border border-transparent hover:border-foreground rounded-md min-w-[60px] min-h-[40px] flex items-center justify-center;
+    @apply cursor-pointer p-2 md:p-3 border border-transparent hover:border-foreground rounded-md min-w-[60px] min-h-[40px] flex items-center justify-center transition-all duration-200;
   }
+  
+  .dark .sidebar-button {
+    @apply hover:bg-secondary/50;
+  }
+  
   .item-button {
-    @apply p-3 hover:bg-muted hover:no-underline;
+    @apply p-3 hover:bg-muted hover:no-underline transition-all duration-200;
   }
+  
+  .dark .item-button {
+    @apply hover:bg-secondary/70;
+  }
+  
   .h1-bold{
     @apply font-bold text-2xl lg:text-3xl;
   }
@@ -166,6 +188,38 @@
   
   .web-page-content p {
     @apply py-2;
+  }
+  
+  /* Enhanced dark mode styling */
+  .dark {
+    /* Improved shadows for depth */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.3), 0 8px 10px -6px rgb(0 0 0 / 0.3);
+  }
+  
+  /* Better card styling in dark mode */
+  .dark .bg-card {
+    @apply border border-border/50 shadow-md;
+  }
+  
+  /* Enhanced button styling */
+  .dark button {
+    @apply transition-all duration-200;
+  }
+  
+  /* Better input styling */
+  .dark input,
+  .dark textarea,
+  .dark select {
+    @apply border-border/50 bg-background/50 backdrop-blur-sm;
+  }
+  
+  /* Improved focus states */
+  .dark *:focus-visible {
+    @apply ring-2 ring-ring/50 ring-offset-2 ring-offset-background;
   }
 
 }

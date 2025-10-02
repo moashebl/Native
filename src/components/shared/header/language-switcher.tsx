@@ -42,7 +42,7 @@ export default function LanguageSwitcher() {
           <ChevronDownIcon />
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className='w-56 z-[60]' sideOffset={6}>
+      <DropdownMenuContent className='w-56 z-[500]' sideOffset={6}>
         <DropdownMenuLabel>Language</DropdownMenuLabel>
         <DropdownMenuRadioGroup value={locale} onValueChange={handleLanguageChange}>
           {languages.map((lang) => (
