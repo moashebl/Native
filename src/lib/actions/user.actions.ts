@@ -338,3 +338,98 @@ export async function resendVerificationEmail(userEmail: string) {
 export async function getUserAvailableRoles() {
   return await getAvailableRoles()
 }
+
+// Password reset
+export async function requestPasswordReset(email: string) {
+  try {
+    console.log('🔍 Password reset requested for:', email)
+    await connectToDatabase()
+
+    const user = await User.findOne({ email })
+
+    if (!user) {
+      console.log('❌ User not found for email:', email)
+      // Don't reveal if user exists or not for security
+      return { success: true, message: 'If an account with that email exists, a password reset link has been sent.' }
+    }
+
+    console.log('👤 User found:', user._id)
+
+    // Generate password reset token
+    const passwordResetToken = crypto.randomUUID()
+    const passwordResetTokenExpires = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
+
+    console.log('🔑 Generated token:', passwordResetToken.substring(0, 8) + '...')
+    console.log('⏰ Token expires at:', passwordResetTokenExpires)
+
+    user.passwordResetToken = passwordResetToken
+    user.passwordResetTokenExpires = passwordResetTokenExpires
+
+    await user.save()
+    console.log('✅ Token saved to database')
+
+    // Send password reset email
+    try {
+      const { emailService } = await import('../email-service')
+      await emailService.sendPasswordResetEmail(
+        user.email,
+        user.name,
+        passwordResetToken
+      )
+      console.log(`📧 Password reset email sent to ${user.email}`)
+    } catch (emailError) {
+      console.error('💥 Failed to send password reset email:', emailError)
+      return { success: false, message: 'Failed to send password reset email' }
+    }
+
+    return { success: true, message: 'If an account with that email exists, a password reset link has been sent.' }
+  } catch (error) {
+    console.error('💥 Error in requestPasswordReset:', error)
+    return { success: false, message: formatError(error) }
+  }
+}
+
+export async function resetPassword(token: string, newPassword: string) {
+  try {
+    console.log('🔍 Attempting password reset with token:', token.substring(0, 8) + '...')
+    await connectToDatabase()
+
+    const currentTime = new Date()
+    console.log('⏰ Current time:', currentTime)
+
+    const user = await User.findOne({
+      passwordResetToken: token,
+      passwordResetTokenExpires: { $gt: currentTime }
+    })
+
+    console.log('👤 User found:', user ? `ID: ${user._id}, Token expires: ${user.passwordResetTokenExpires}` : 'No user found')
+
+    if (!user) {
+      // Check if token exists but expired
+      const expiredUser = await User.findOne({ passwordResetToken: token })
+      if (expiredUser) {
+        console.log('❌ Token exists but expired. Token expired at:', expiredUser.passwordResetTokenExpires)
+      } else {
+        console.log('❌ No user found with this token')
+      }
+      return { success: false, message: 'Invalid or expired password reset token' }
+    }
+
+    console.log('✅ Valid token found, updating password')
+
+    // Hash new password
+    user.password = await bcrypt.hash(newPassword, 5)
+
+    // Clear password reset token
+    user.passwordResetToken = undefined
+    user.passwordResetTokenExpires = undefined
+
+    await user.save()
+    console.log('✅ Password reset successfully')
+
+    return { success: true, message: 'Password reset successfully' }
+  } catch (error) {
+    console.error('💥 Error in resetPassword:', error)
+    return { success: false, message: formatError(error) }
+  }
+}

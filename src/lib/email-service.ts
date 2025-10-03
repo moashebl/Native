@@ -3,6 +3,7 @@ import { APP_NAME } from './constants'
 import { render } from '@react-email/render'
 import { fetchExchangeRates } from './currency-api'
 import VerificationEmail from '../emails/verification-email'
+import PasswordResetEmail from '../emails/password-reset-email'
 import OrderConfirmationEmail from '../emails/order-confirmation'
 import PaymentConfirmationEmail from '../emails/payment-confirmation'
 import DeliveryConfirmationEmail from '../emails/delivery-confirmation'
@@ -46,6 +47,35 @@ export class EmailService {
       return true
     } catch (error) {
       console.error('Error sending verification email:', error)
+      return false
+    }
+  }
+
+  // Send password reset email
+  async sendPasswordResetEmail(userEmail: string, userName: string, resetToken: string): Promise<boolean> {
+    try {
+      const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`
+
+      const emailHtml = await render(
+        PasswordResetEmail({
+          userName,
+          resetToken,
+          resetUrl,
+          siteName: APP_NAME,
+        })
+      )
+
+      await transporter.sendMail({
+        from: this.senderEmail,
+        to: userEmail,
+        subject: 'Reset Your Password',
+        html: emailHtml,
+      })
+
+      console.log(`Password reset email sent to ${userEmail}`)
+      return true
+    } catch (error) {
+      console.error('Error sending password reset email:', error)
       return false
     }
   }

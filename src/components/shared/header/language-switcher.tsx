@@ -8,24 +8,12 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import { ChevronDownIcon } from 'lucide-react'
-import { useLanguage } from '../language-provider'
 import { useCurrency } from '../currency-provider'
 
-const languages = [
-  { code: 'en-US', name: 'English', icon: '🇺🇸' },
-  { code: 'ar', name: 'العربية', icon: '🇸🇦' },
-]
-
 export default function LanguageSwitcher() {
-  const { locale, setLocale } = useLanguage()
   const { currency, setCurrency, currencies, isLoading } = useCurrency()
-
-  const handleLanguageChange = (newLocale: string) => {
-    setLocale(newLocale)
-  }
 
   const handleCurrencyChange = (newCurrency: string) => {
     setCurrency(newCurrency as 'USD' | 'EUR' | 'EGP')
@@ -35,28 +23,12 @@ export default function LanguageSwitcher() {
     <DropdownMenu>
       <DropdownMenuTrigger className='header-button h-[34px] md:h-[41px]'>
         <div className='flex items-center gap-1'>
-          <span className='text-xl'>
-            {languages.find((l) => l.code === locale)?.icon}
-          </span>
-          {locale === 'ar' ? 'العربية' : 'English'}
+          <span className='text-lg'>💱</span>
+          Currency
           <ChevronDownIcon />
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent className='w-56 z-[500]' sideOffset={6}>
-        <DropdownMenuLabel>Language</DropdownMenuLabel>
-        <DropdownMenuRadioGroup value={locale} onValueChange={handleLanguageChange}>
-          {languages.map((lang) => (
-            <DropdownMenuRadioItem key={lang.code} value={lang.code}>
-              <div className='flex items-center gap-2'>
-                <span className='text-lg'>{lang.icon}</span>
-                <span>{lang.name}</span>
-              </div>
-            </DropdownMenuRadioItem>
-          ))}
-        </DropdownMenuRadioGroup>
-        
-        <DropdownMenuSeparator />
-        
         <DropdownMenuLabel>Currency</DropdownMenuLabel>
         <DropdownMenuRadioGroup value={currency} onValueChange={handleCurrencyChange}>
           {currencies.map((currencyInfo) => (

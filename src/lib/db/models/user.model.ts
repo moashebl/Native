@@ -22,11 +22,14 @@ const userSchema = new Schema<IUser>(
     password: { type: String },
     image: { type: String },
     emailVerified: { type: Boolean, default: false },
-    verificationToken: { type: String },
-    verificationTokenExpires: { type: Date },
+    verificationToken: { type: String, required: false },
+    verificationTokenExpires: { type: Date, required: false },
+    passwordResetToken: { type: String, required: false },
+    passwordResetTokenExpires: { type: Date, required: false },
   },
   {
     timestamps: true,
+    strict: false,
   }
 )
 

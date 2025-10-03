@@ -37,86 +37,141 @@ export default async function OrdersPage(props: {
     page: Number(page),
   })
   return (
-    <div className='space-y-2'>
-      <h1 className='h1-bold'>Orders</h1>
-      <div className='overflow-x-auto'>
+    <div className='space-y-6'>
+      <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
+        <h1 className='text-2xl md:text-3xl font-bold tracking-tight'>Orders</h1>
+        <div className='text-sm text-muted-foreground'>
+          Total: {orders.totalDocs} orders
+        </div>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className='block lg:hidden space-y-4'>
+        {orders.data.map((order: IOrderList) => (
+          <div key={order._id} className='bg-card border rounded-lg p-4 space-y-3 shadow-sm hover:shadow-md transition-shadow'>
+            <div className='flex items-start justify-between'>
+              <div>
+                <p className='text-xs text-muted-foreground'>Order ID</p>
+                <p className='font-mono text-sm font-medium'>{formatId(order._id)}</p>
+              </div>
+              <div className='text-right'>
+                <p className='text-xs text-muted-foreground'>Total</p>
+                <p className='font-semibold text-lg'>
+                  <ProductPrice price={order.totalPrice} plain />
+                </p>
+              </div>
+            </div>
+
+            <div className='grid grid-cols-2 gap-3 text-sm'>
+              <div>
+                <p className='text-xs text-muted-foreground mb-1'>Customer</p>
+                <p className='font-medium'>{order.user ? order.user.name : 'Deleted User'}</p>
+              </div>
+              <div>
+                <p className='text-xs text-muted-foreground mb-1'>Date</p>
+                <p className='text-xs'>{formatFullDateTime(order.createdAt!).dateOnly}</p>
+              </div>
+            </div>
+
+            <div className='flex gap-2 flex-wrap'>
+              {order.isPaid ? (
+                <span className='inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'>
+                  ✓ Paid
+                </span>
+              ) : (
+                <span className='inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400'>
+                  ✗ Unpaid
+                </span>
+              )}
+              {order.isDelivered ? (
+                <span className='inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'>
+                  ✓ Delivered
+                </span>
+              ) : (
+                <span className='inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400'>
+                  🚚 In Transit
+                </span>
+              )}
+            </div>
+
+            <div className='flex gap-2 pt-2 border-t'>
+              <Button asChild variant='outline' size='sm' className='flex-1'>
+                <Link href={`/admin/orders/${order._id}`}>View Details</Link>
+              </Button>
+              <StatusUpdateButtons order={order} />
+              <DeleteDialog id={order._id} action={deleteOrder} />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop Table View */}
+      <div className='hidden lg:block overflow-x-auto rounded-lg border shadow-sm'>
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Id</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Buyer</TableHead>
-              <TableHead>Total</TableHead>
-              <TableHead>Paid</TableHead>
-              <TableHead>Delivered</TableHead>
-              <TableHead>Actions</TableHead>
+            <TableRow className='bg-muted/50'>
+              <TableHead className='font-semibold'>Order ID</TableHead>
+              <TableHead className='font-semibold'>Date</TableHead>
+              <TableHead className='font-semibold'>Customer</TableHead>
+              <TableHead className='font-semibold text-right'>Total</TableHead>
+              <TableHead className='font-semibold'>Payment</TableHead>
+              <TableHead className='font-semibold'>Delivery</TableHead>
+              <TableHead className='font-semibold text-right'>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {orders.data.map((order: IOrderList) => (
-              <TableRow key={order._id}>
-                <TableCell>{formatId(order._id)}</TableCell>
-                <TableCell>
-                  {formatFullDateTime(order.createdAt!).fullDateTime}
+              <TableRow key={order._id} className='hover:bg-muted/30'>
+                <TableCell className='font-mono text-sm'>{formatId(order._id)}</TableCell>
+                <TableCell className='text-sm whitespace-nowrap'>
+                  {formatFullDateTime(order.createdAt!).dateOnly}
                 </TableCell>
-                <TableCell>
+                <TableCell className='font-medium'>
                   {order.user ? order.user.name : 'Deleted User'}
                 </TableCell>
-                <TableCell>
-                  {' '}
+                <TableCell className='text-right font-semibold'>
                   <ProductPrice price={order.totalPrice} plain />
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-2">
-                    {order.isPaid ? (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        ✅ Paid
-                        {order.paidAt && (
-                          <span className="ml-1 text-xs">
-                            {formatFullDateTime(order.paidAt).fullDateTime}
-                          </span>
-                        )}
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                        ❌ Unpaid
-                      </span>
-                    )}
-                  </div>
+                  {order.isPaid ? (
+                    <span className='inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'>
+                      ✓ Paid
+                    </span>
+                  ) : (
+                    <span className='inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400'>
+                      ✗ Unpaid
+                    </span>
+                  )}
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-2">
-                    {order.isDelivered ? (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        ✅ Delivered
-                        {order.deliveredAt && (
-                          <span className="ml-1 text-xs">
-                            {formatFullDateTime(order.deliveredAt).fullDateTime}
-                          </span>
-                        )}
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                        🚚 In Transit
-                      </span>
-                    )}
-                  </div>
+                  {order.isDelivered ? (
+                    <span className='inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'>
+                      ✓ Delivered
+                    </span>
+                  ) : (
+                    <span className='inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400'>
+                      🚚 In Transit
+                    </span>
+                  )}
                 </TableCell>
-                <TableCell className='flex gap-1'>
-                  <Button asChild variant='outline' size='sm'>
-                    <Link href={`/admin/orders/${order._id}`}>Details</Link>
-                  </Button>
-                  <DeleteDialog id={order._id} action={deleteOrder} />
-                  <StatusUpdateButtons order={order} />
+                <TableCell>
+                  <div className='flex gap-2 justify-end'>
+                    <Button asChild variant='outline' size='sm'>
+                      <Link href={`/admin/orders/${order._id}`}>Details</Link>
+                    </Button>
+                    <StatusUpdateButtons order={order} />
+                    <DeleteDialog id={order._id} action={deleteOrder} />
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-        {orders.totalPages > 1 && (
-          <Pagination page={page} totalPages={orders.totalPages!} />
-        )}
       </div>
+
+      {orders.totalPages > 1 && (
+        <Pagination page={page} totalPages={orders.totalPages!} />
+      )}
     </div>
   )
 }

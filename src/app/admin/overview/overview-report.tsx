@@ -91,26 +91,26 @@ export default function OverviewReport() {
       </div>
     )
   return (
-    <div>
-      <div className='flex items-center justify-between mb-2'>
-        <h1 className='h1-bold'>Dashboard</h1>
+    <div className='space-y-6'>
+      <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
+        <h1 className='text-2xl md:text-3xl font-bold tracking-tight'>Dashboard</h1>
         <CalendarDateRangePicker defaultDate={date} setDate={setDate} />
       </div>
       <div className='space-y-4'>
-        <div className='grid gap-4  grid-cols-2 lg:grid-cols-4'>
+        <div className='grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'>
           <Card>
             <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
               <CardTitle className='text-sm font-medium'>
                 Total Revenue
               </CardTitle>
-              <BadgeDollarSign />
+              <BadgeDollarSign className='h-4 w-4 text-muted-foreground' />
             </CardHeader>
             <CardContent className='space-y-2'>
-              <div className='text-2xl font-bold'>
+              <div className='text-xl md:text-2xl font-bold'>
                 <ProductPrice price={data.totalSales} plain />
               </div>
               <div>
-                <Link className='text-xs' href='/admin/orders'>
+                <Link className='text-xs text-primary hover:underline' href='/admin/orders'>
                   View revenue
                 </Link>
               </div>
@@ -121,14 +121,14 @@ export default function OverviewReport() {
               <CardTitle className='text-sm font-medium'>
                 Sales
               </CardTitle>
-              <CreditCard />
+              <CreditCard className='h-4 w-4 text-muted-foreground' />
             </CardHeader>
             <CardContent className='space-y-2'>
-              <div className='text-2xl font-bold'>
+              <div className='text-xl md:text-2xl font-bold'>
                 {formatNumber(data.ordersCount)}
               </div>
               <div>
-                <Link className='text-xs' href='/admin/orders'>
+                <Link className='text-xs text-primary hover:underline' href='/admin/orders'>
                   View orders
                 </Link>
               </div>
@@ -139,12 +139,12 @@ export default function OverviewReport() {
               <CardTitle className='text-sm font-medium'>
                 Customers
               </CardTitle>
-              <Users />
+              <Users className='h-4 w-4 text-muted-foreground' />
             </CardHeader>
             <CardContent className='space-y-2'>
-              <div className='text-2xl font-bold'>{data.usersCount}</div>
+              <div className='text-xl md:text-2xl font-bold'>{data.usersCount}</div>
               <div>
-                <Link className='text-xs' href='/admin/users'>
+                <Link className='text-xs text-primary hover:underline' href='/admin/users'>
                   View customers
                 </Link>
               </div>
@@ -155,12 +155,12 @@ export default function OverviewReport() {
               <CardTitle className='text-sm font-medium'>
                 Products
               </CardTitle>
-              <Barcode />
+              <Barcode className='h-4 w-4 text-muted-foreground' />
             </CardHeader>
             <CardContent className='space-y-2'>
-              <div className='text-2xl font-bold'>{data.productsCount}</div>
+              <div className='text-xl md:text-2xl font-bold'>{data.productsCount}</div>
               <div>
-                <Link className='text-xs' href='/admin/products'>
+                <Link className='text-xs text-primary hover:underline' href='/admin/products'>
                   View products
                 </Link>
               </div>

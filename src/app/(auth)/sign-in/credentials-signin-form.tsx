@@ -110,7 +110,12 @@ export default function CredentialsSignInForm() {
             name='password'
             render={({ field }) => (
               <FormItem className='w-full'>
-                <FormLabel>Password</FormLabel>
+                <div className='flex items-center justify-between'>
+                  <FormLabel>Password</FormLabel>
+                  <Link href='/forgot-password' className='text-sm text-primary hover:underline'>
+                    Forgot Password?
+                  </Link>
+                </div>
                 <FormControl>
                   <Input
                     type='password'

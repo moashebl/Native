@@ -38,7 +38,7 @@ export function AdminNav({
   return (
     <nav
       className={cn(
-        'flex items-center flex-wrap overflow-hidden gap-2 md:gap-4',
+        'flex items-center gap-1 md:gap-2',
         className
       )}
       {...props}
@@ -48,8 +48,10 @@ export function AdminNav({
           key={item.href}
           href={item.href}
           className={cn(
-            '',
-            pathname.includes(item.href) ? '' : 'text-muted-foreground'
+            'px-3 py-1.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap',
+            pathname.includes(item.href)
+              ? 'bg-white/10 text-white'
+              : 'text-gray-400 hover:text-white hover:bg-white/5'
           )}
         >
           {item.title}

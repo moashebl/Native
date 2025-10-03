@@ -44,12 +44,12 @@ export default function Header() {
   
   return (
     <header className='bg-background border-b border-border text-foreground shadow-sm'>
-      <div className='px-4 py-2'>
+      <div className='px-4 py-0'>
         <div className='flex items-center justify-between relative z-10'>
           <div className='flex items-center'>
             <Link
               href='/'
-              className='flex items-center m-0 p-0'
+              className='flex items-center m-0 p-0 -my-2'
             >
               <Image
                 src='/icons/logo.svg'

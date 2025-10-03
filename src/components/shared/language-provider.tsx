@@ -13,38 +13,21 @@ type LanguageContextType = {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState('en-US')
+  const [locale] = useState('en-US')
 
   useEffect(() => {
-    // Get saved locale from localStorage
-    const savedLocale = localStorage.getItem('locale') || 'en-US'
-    setLocaleState(savedLocale)
-    
-    // Set document direction
-    if (savedLocale === 'ar') {
-      document.documentElement.dir = 'rtl'
-      document.documentElement.lang = 'ar'
-    } else {
-      document.documentElement.dir = 'ltr'
-      document.documentElement.lang = 'en'
-    }
+    // Always force English and LTR
+    document.documentElement.dir = 'ltr'
+    document.documentElement.lang = 'en'
+    // Clear any old Arabic setting
+    localStorage.removeItem('locale')
   }, [])
 
-  const setLocale = (newLocale: string) => {
-    setLocaleState(newLocale)
-    localStorage.setItem('locale', newLocale)
-    
-    // Update document direction
-    if (newLocale === 'ar') {
-      document.documentElement.dir = 'rtl'
-      document.documentElement.lang = 'ar'
-    } else {
-      document.documentElement.dir = 'ltr'
-      document.documentElement.lang = 'en'
-    }
+  const setLocale = () => {
+    // Disabled - English only
   }
 
-  const direction = locale === 'ar' ? 'rtl' : 'ltr'
+  const direction = 'ltr' as const
 
   // Translation function that uses the translations file
   const t = (key: TranslationKey, params?: Record<string, string | number>): string => {
