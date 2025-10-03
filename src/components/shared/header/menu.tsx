@@ -67,7 +67,7 @@ export default function MobileMenu() {
             minWidth: '44px'
           }}
         >
-          <Menu className='h-6 w-6 text-foreground' strokeWidth={2} />
+          <Menu className='h-6 w-6' strokeWidth={2} />
           <span className='sr-only'>Toggle menu</span>
         </Button>
       </SheetTrigger>

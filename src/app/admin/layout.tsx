@@ -25,9 +25,9 @@ export default async function AdminLayout({
   
   return (
     <>
-      <div className='flex flex-col min-h-screen'>
-        <div className='bg-black text-white border-b border-gray-800'>
-          <div className='flex h-16 items-center px-4 md:px-6'>
+      <div className='flex flex-col min-h-screen overflow-x-hidden'>
+        <div className='bg-black text-white border-b border-gray-800 w-full'>
+          <div className='flex h-16 items-center px-4 md:px-6 w-full'>
             <Link href='/' className='flex-shrink-0'>
               <Image
                 src='/icons/logo.svg'
@@ -38,22 +38,22 @@ export default async function AdminLayout({
               />
             </Link>
             <AdminNav className='mx-6 hidden md:flex' />
-            <div className='ml-auto flex items-center gap-2 md:gap-4'>
+            <div className='ml-auto flex items-center gap-2 md:gap-4 flex-shrink-0'>
               <div className='hidden sm:flex items-center gap-2 md:gap-4'>
                 <LanguageSwitcher />
                 <ThemeSwitcher />
               </div>
               <UserButton />
             </div>
-            <div className='md:hidden ml-2'>
+            <div className='md:hidden ml-2 flex-shrink-0'>
               <MobileMenu />
             </div>
           </div>
-          <div className='border-t border-gray-800 md:hidden'>
+          <div className='border-t border-gray-800 md:hidden w-full'>
             <AdminNav className='flex px-4 py-3 overflow-x-auto scrollbar-hide' />
           </div>
         </div>
-        <div className='flex-1 p-4 md:p-6 bg-background'>{children}</div>
+        <div className='flex-1 p-4 md:p-6 bg-background w-full'>{children}</div>
       </div>
     </>
   )

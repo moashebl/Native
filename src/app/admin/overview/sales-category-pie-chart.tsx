@@ -52,12 +52,13 @@ export default function SalesCategoryPieChart({ data }: { data: any[] }) {
 
   return (
     <ResponsiveContainer width='100%' height={400}>
-      <PieChart width={400} height={400}>
+      <PieChart>
         <Pie
           data={data}
           dataKey='totalSales'
           cx='50%'
           cy='50%'
+          outerRadius={120}
           labelLine={false}
           label={renderCustomizedLabel}
         >
