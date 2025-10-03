@@ -204,44 +204,44 @@ export default function OverviewReport() {
           </Card>
         </div>
 
-        <div className='grid gap-4 md:grid-cols-2'>
-          <Card>
+        <div className='grid gap-4 grid-cols-1 md:grid-cols-2'>
+          <Card className='overflow-hidden'>
             <CardHeader>
               <CardTitle>Best-Selling Categories</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className='px-2 sm:px-6'>
               <SalesCategoryPieChart data={data.topSalesCategories} />
             </CardContent>
           </Card>
-          <Card>
+          <Card className='overflow-hidden'>
             <CardHeader>
               <CardTitle>Recent Sales</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className='overflow-x-auto px-0 sm:px-6'>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Buyer</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead className='whitespace-nowrap'>Buyer</TableHead>
+                    <TableHead className='whitespace-nowrap'>Date</TableHead>
+                    <TableHead className='whitespace-nowrap'>Total</TableHead>
+                    <TableHead className='whitespace-nowrap'>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {data.latestOrders.map((order: IOrderList) => (
                     <TableRow key={order._id}>
-                      <TableCell>
+                      <TableCell className='whitespace-nowrap'>
                         {order.user ? order.user.name : 'Deleted User'}
                       </TableCell>
 
-                      <TableCell>
+                      <TableCell className='whitespace-nowrap'>
                         {formatDateTime(order.createdAt).dateOnly}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className='whitespace-nowrap'>
                         <ProductPrice price={order.totalPrice} plain />
                       </TableCell>
 
-                      <TableCell>
+                      <TableCell className='whitespace-nowrap'>
                         <Link href={`/admin/orders/${order._id}`}>
                           <span className='px-2'>Details</span>
                         </Link>
