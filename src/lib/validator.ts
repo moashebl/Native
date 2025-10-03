@@ -172,6 +172,8 @@ export const UserInputSchema = z.object({
   password: Password.optional(),
   verificationToken: z.string().optional(),
   verificationTokenExpires: z.date().optional(),
+  passwordResetToken: z.string().optional(),
+  passwordResetTokenExpires: z.date().optional(),
   paymentMethod: z.string().min(1, 'Payment method is required').optional(),
   address: z.object({
     fullName: z.string().min(1, 'Full name is required'),

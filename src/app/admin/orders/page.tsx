@@ -41,7 +41,7 @@ export default async function OrdersPage(props: {
       <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
         <h1 className='text-2xl md:text-3xl font-bold tracking-tight'>Orders</h1>
         <div className='text-sm text-muted-foreground'>
-          Total: {orders.totalDocs} orders
+          Total: {orders.data.length} orders
         </div>
       </div>
 
